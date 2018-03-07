@@ -3,7 +3,7 @@
 WebfactoryHttpCacheBundle is a Symfony bundle that eases
 [HTTP cache validation via the last modified header](https://symfony.com/doc/current/http_cache/validation.html#validation-with-the-last-modified-header).
 
-It provides the ```ReplaceWithNotModified``` annotation for your controller actions. This annotation can be
+It provides the ```ReplaceWithNotModifiedResponse``` annotation for your controller actions. This annotation can be
 parameterised with Voters, one for each of the underlying ressources that overall determine the last modified date for
 the response. By extracting the "last modified date of a ressource" parts into small, reusable Voters, it helps to keep
 the controller clean and redundance-free. Compare for yourself a controller handling all by itself:
