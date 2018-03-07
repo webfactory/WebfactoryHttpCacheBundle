@@ -20,7 +20,7 @@ use Webfactory\HttpCacheBundle\NotModified\VoterInterface;
  *
  * @Annotation
  */
-class ReplaceWithNotModifiedResponse
+final class ReplaceWithNotModifiedResponse
 {
     /** @var array */
     private $parameters;
@@ -74,7 +74,6 @@ class ReplaceWithNotModifiedResponse
             throw new \RuntimeException('The annotation ' . get_class($this) . ' has to be parametrised with voters.');
         }
 
-        $runningIndex = 1;
         foreach ($this->parameters['voters'] as $voterDescription) {
             $voter = null;
 
@@ -87,10 +86,6 @@ class ReplaceWithNotModifiedResponse
             }
 
             if (is_array($voterDescription)) {
-                if (count($voterDescription) !== 1) {
-                    throw new \RuntimeException('Voter #' . $runningIndex . ' (starting with 1) is misconfigured.');
-                }
-
                 $voterClass = key($voterDescription);
                 $voterParameter = current($voterDescription);
                 $voter = new $voterClass($voterParameter);

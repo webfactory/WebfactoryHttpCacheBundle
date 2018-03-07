@@ -74,17 +74,7 @@ final class ReplaceWithNotModifiedResponseTest extends \PHPUnit_Framework_TestCa
     /**
      * @test
      */
-    public function invalidArrayAsVoterParameter()
-    {
-        $this->setExpectedException(\RuntimeException::class);
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => [['invalid', 'array', 'structure']]]);
-        $annotation->determineLastModified(new Request());
-    }
-
-    /**
-     * @test
-     */
-    public function validArrayAsVoterParameterWithConstructorArguments()
+    public function arrayAsVoterParameterWithConstructorArguments()
     {
         $this->setExpectedException(null);
         $annotation = new ReplaceWithNotModifiedResponse(['voters' => [[Voter::class => new \DateTime('2000-01-01')]]]);
