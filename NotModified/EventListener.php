@@ -50,8 +50,8 @@ final class EventListener
 
     /**
      * When the controller action for a request is determined, check it for a ReplaceWithNotModifiedResponse annotation.
-     * If it determines that the underlying ressources for the response were not modified after the "If-Modified-Since"
-     * header in the request, replace the determines controller action with an minimal action that just returns an
+     * If it determines that the underlying resources for the response were not modified after the "If-Modified-Since"
+     * header in the request, replace the determined controller action with a minimal action that just returns an
      * "empty" response with a 304 Not Modified HTTP status code.
      *
      * @param FilterControllerEvent $event

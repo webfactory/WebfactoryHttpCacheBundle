@@ -4,7 +4,7 @@ WebfactoryHttpCacheBundle is a Symfony bundle that eases
 [HTTP cache validation via the last modified header](https://symfony.com/doc/current/http_cache/validation.html#validation-with-the-last-modified-header).
 
 It provides the ```ReplaceWithNotModifiedResponse``` annotation for your controller actions. This annotation can be
-parameterised with Voters, one for each of the underlying ressources that overall determine the last modified date for
+parameterised with Voters, one for each of the underlying resources, and determines the overall latest "last modified" date for
 the response. If the client request contains an appropriate if-not-modified-since header, the execution of the
 controller action will be skipped and an empty response with a 304 Not Modified status code will be sent. If your Voters
 are fast, this can improve your performance greatly.
@@ -116,8 +116,8 @@ services:
 ```
 
 Although this seems to be more code, we find it to be a good deal, as we separate the concerns better and encapsulate
-the tasks in a smaller units that are easier to understand and test. Another advantage becomes obvious when we have
-another controller action that depends on an article for it's last modified date - we can reuse the ArticleVoter and
+the tasks into smaller units that are easier to understand and test. Another advantage becomes obvious when we have
+another controller action that depends on an article for its last modified date - we can reuse the ArticleVoter and
 combine it with other Voters.
 
    
@@ -208,7 +208,7 @@ final class MyController
 }
 ```
 
-The most simple form of adding a Voter is passing it's fully qualfified class name:
+The most simple form of adding a Voter is passing its fully qualfified class name:
 
     @ReplaceWithNotModifiedResponse(voters = {"\My\Namespace\MySimpleVoter"})
 
