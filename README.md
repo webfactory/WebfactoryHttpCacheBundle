@@ -5,8 +5,13 @@ WebfactoryHttpCacheBundle is a Symfony bundle that eases
 
 It provides the ```ReplaceWithNotModifiedResponse``` annotation for your controller actions. This annotation can be
 parameterised with Voters, one for each of the underlying ressources that overall determine the last modified date for
-the response. By extracting the "last modified date of a ressource" parts into small, reusable Voters, it helps to keep
-the controller clean and redundance-free. Compare for yourself a controller handling all by itself:
+the response. If the client request contains an appropriate if-not-modified-since header, the execution of the
+controller action will be skipped and an empty response with a 304 Not Modified status code will be sent. If your Voters
+are fast, this can improve your performance greatly.
+
+By encouraging to extract the "last modified date of a ressource" parts into small, reusable Voters, the bundle helps to
+keep controllers clean and redundance-free. Compare for yourself a controller taking care of a 304 Not Modified response
+by itself:
 
 ```php
 <?php
