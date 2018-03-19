@@ -30,6 +30,10 @@
     "phpunit/phpunit": "^4.8.0"
   },
 
+  "suggest": {
+    "webfactory/wfdmeta-bundle": "Invalidate caches based on meta data tracked with wfDynamic"
+  },
+
   "autoload": {
     "psr-4": {
       "Webfactory\\HttpCacheBundle\\": ""
