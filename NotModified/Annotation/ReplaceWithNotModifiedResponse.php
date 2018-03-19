@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Webfactory\HttpCacheBundle\NotModified\VoterInterface;
 
 /**
- * This Annotation determines the last modified date over all of it's parameterising voters. This date is used by the
+ * This Annotation determines the last modified date over all of its parameterised voters. This date is used by the
  * \Webfactory\HttpCacheBundle\NotModified\EventListener to possibly replace the execution of a controller with
  * sending a Not Modified HTTP response.
  *

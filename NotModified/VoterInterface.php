@@ -13,8 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 /**
  * The ReplaceWithNotModifiedResponse method annotation is parameterised with Voters. Each Voter should determine the
- * last modified date of one of the various underlying ressources for a response. E.g. if your controller's indexAction
- * build a response containing News and Users, you can write a NewsVoter determining the date of the last published
+ * last modified date of one of the various underlying resources for a response. E.g. if your controller's indexAction
+ * builds a response containing News and Users, you can write a NewsVoter determining the date of the last published
  * News and a UserVoter determining the creation date of the last registered User.
  */
 interface VoterInterface
