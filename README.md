@@ -69,7 +69,17 @@ What we like about the LastModifiedDeterminators is that they encourage
 to separate the concerns nicely and encapsulate the tasks into small
 units that are easy to understand, reusable and unit test.
    
+*Note:* `@ReplaceWithNotModifiedResponse` does not alter or add
+`Cache-Control` header settings. So, by default your response will
+remain `private` and end up in browser caches only. If you want it to be
+kept in surrogate caches (like Varnish or the Symfony Http Cache), you
+can add `@Cache(smaxage="0")`. This will make the response `public`, but
+also requires a revalidation on every request as the response is
+*always* considered stale. [Learn more about Symonfy's HTTP caching].
 
+[Learn more about Symonfy's HTTP caching]: http://symfony.com/doc/current/book/http_cache.html
+
+ 
 
 ## Installation
 
