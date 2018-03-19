@@ -12,7 +12,7 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified\Annotation;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Webfactory\HttpCacheBundle\NotModified\Annotation\ReplaceWithNotModifiedResponse;
-use Webfactory\HttpCacheBundle\NotModified\VoterInterface;
+use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 
 /**
  * Tests for the ReplaceWithNotModifiedResponse annotation.
@@ -22,49 +22,39 @@ final class ReplaceWithNotModifiedResponseTest extends \PHPUnit_Framework_TestCa
     /**
      * @test
      */
-    public function votersParameterIsRequired()
+    public function lastModifiedDescriptionsCannotBeEmpty()
     {
         $this->setExpectedException(\RuntimeException::class);
-        $annotation = new ReplaceWithNotModifiedResponse([]);
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => []]);
         $annotation->determineLastModified(new Request());
     }
 
     /**
      * @test
      */
-    public function votersParameterCannotBeEmpty()
-    {
-        $this->setExpectedException(\RuntimeException::class);
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => []]);
-        $annotation->determineLastModified(new Request());
-    }
-
-    /**
-     * @test
-     */
-    public function stringAsSimpleVoterParameter()
+    public function stringAsSimpleLastModifiedDescription()
     {
         $this->setExpectedException(null);
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => [Voter::class]]);
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => [MyLastModifedDeterminator::class]]);
         $annotation->determineLastModified(new Request());
     }
 
     /**
      * @test
      */
-    public function serviceNameAsVoterParameter()
+    public function serviceNameAsLastModifiedDescription()
     {
-        $voterServiceName = '@my.service';
-        $voterServiceObject = new Voter();
+        $lastModifiedDeterminatorServiceName = '@my.service';
+        $lastModifiedDeterminatorServiceObject = new MyLastModifedDeterminator();
 
         /** @var ContainerInterface|\PHPUnit_Framework_MockObject_MockObject $container */
         $container = $this->getMock(ContainerInterface::class);
         $container->expects($this->once())
             ->method('get')
-            ->with($voterServiceName)
-            ->willReturn($voterServiceObject);
+            ->with($lastModifiedDeterminatorServiceName)
+            ->willReturn($lastModifiedDeterminatorServiceObject);
 
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => [$voterServiceName]]);
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => [$lastModifiedDeterminatorServiceName]]);
         $annotation->setContainer($container);
 
         $this->setExpectedException(null);
@@ -74,29 +64,29 @@ final class ReplaceWithNotModifiedResponseTest extends \PHPUnit_Framework_TestCa
     /**
      * @test
      */
-    public function arrayAsVoterParameterWithConstructorArguments()
+    public function arrayAslastModifiedDeterminatorDescriptionWithConstructorArguments()
     {
         $this->setExpectedException(null);
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => [[Voter::class => new \DateTime('2000-01-01')]]]);
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => [[MyLastModifedDeterminator::class => new \DateTime('2000-01-01')]]]);
         $annotation->determineLastModified(new Request());
     }
 
     /**
      * @test
      */
-    public function votersHaveToImplementInterface()
+    public function lastModifiedDeterminatorsHaveToImplementInterface()
     {
         $this->setExpectedException(\RuntimeException::class);
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => [VoterWithoutInterface::class]]);
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => [FakeLastModifiedDeterminatorWithoutInterface::class]]);
         $annotation->determineLastModified(new Request());
     }
 
     /**
      * @test
      */
-    public function determineLastModifiedDeterminesLastModifiedOfOneVoter()
+    public function determineLastModifiedDeterminesLastModifiedOfOneDeterminator()
     {
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => [Voter::class]]);
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => [MyLastModifedDeterminator::class]]);
         $this->assertEquals(
             new \DateTime(),
             $annotation->determineLastModified(new Request()),
@@ -108,12 +98,12 @@ final class ReplaceWithNotModifiedResponseTest extends \PHPUnit_Framework_TestCa
     /**
      * @test
      */
-    public function determineLastModifiedDeterminesLastModifiedOfMultipleVoters()
+    public function determineLastModifiedDeterminesLastModifiedOfMultipleDeterminators()
     {
-        $annotation = new ReplaceWithNotModifiedResponse(['voters' => [
-            [Voter::class => new \DateTime('2001-01-01')],
-            [Voter::class => new \DateTime('2003-01-01')],
-            [Voter::class => new \DateTime('2002-01-01')],
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => [
+            [MyLastModifedDeterminator::class => new \DateTime('2001-01-01')],
+            [MyLastModifedDeterminator::class => new \DateTime('2003-01-01')],
+            [MyLastModifedDeterminator::class => new \DateTime('2002-01-01')],
         ]]);
         $this->assertEquals(new \DateTime('2003-01-01'), $annotation->determineLastModified(new Request()));
     }
@@ -121,11 +111,11 @@ final class ReplaceWithNotModifiedResponseTest extends \PHPUnit_Framework_TestCa
 
 
 
-final class VoterWithoutInterface
+final class FakeLastModifiedDeterminatorWithoutInterface
 {
 }
 
-final class Voter implements VoterInterface
+final class MyLastModifedDeterminator implements LastModifiedDeterminator
 {
     /** @var \DateTime */
     private $lastModified;

@@ -11,11 +11,11 @@ namespace Webfactory\HttpCacheBundle\NotModified\Annotation;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Webfactory\HttpCacheBundle\NotModified\VoterInterface;
+use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 
 /**
- * This Annotation determines the last modified date over all of its parameterised voters. This date is used by the
- * \Webfactory\HttpCacheBundle\NotModified\EventListener to possibly replace the execution of a controller with
+ * This Annotation determines the latest last modified date over all of its LastModifiedDeterminators. This date is used
+ * by the \Webfactory\HttpCacheBundle\NotModified\EventListener to possibly replace the execution of a controller with
  * sending a Not Modified HTTP response.
  *
  * @Annotation
@@ -25,8 +25,8 @@ final class ReplaceWithNotModifiedResponse
     /** @var array */
     private $parameters;
 
-    /** @var VoterInterface[] */
-    private $voters;
+    /** @var LastModifiedDeterminator[] */
+    private $lastModifiedDeterminators;
 
     /** @var ContainerInterface */
     private $container;
@@ -48,12 +48,12 @@ final class ReplaceWithNotModifiedResponse
      */
     public function determineLastModified(Request $request)
     {
-        $this->initialiseVoters();
+        $this->initialiseLastModifiedDeterminators();
 
-        foreach ($this->voters as $voter) {
-            $lastModifiedOfCurrentVoter = $voter->getLastModified($request);
-            if ($this->lastModified === null || $this->lastModified < $lastModifiedOfCurrentVoter) {
-                $this->lastModified = $lastModifiedOfCurrentVoter;
+        foreach ($this->lastModifiedDeterminators as $lastModifiedDeterminator) {
+            $lastModifiedOfCurrentDeterminator = $lastModifiedDeterminator->getLastModified($request);
+            if ($this->lastModified === null || $this->lastModified < $lastModifiedOfCurrentDeterminator) {
+                $this->lastModified = $lastModifiedOfCurrentDeterminator;
             }
         }
 
@@ -68,36 +68,36 @@ final class ReplaceWithNotModifiedResponse
         $this->container = $container;
     }
 
-    private function initialiseVoters()
+    private function initialiseLastModifiedDeterminators()
     {
-        if (!array_key_exists('voters', $this->parameters) || count($this->parameters['voters']) === 0) {
-            throw new \RuntimeException('The annotation ' . get_class($this) . ' has to be parametrised with voters.');
+        if (count($this->parameters['value']) === 0) {
+            throw new \RuntimeException('The annotation ' . get_class($this) . ' has to be parametrised with LastModifiedDeterminators.');
         }
 
-        foreach ($this->parameters['voters'] as $voterDescription) {
-            $voter = null;
+        foreach ($this->parameters['value'] as $lastModifiedDeterminatorDescription) {
+            $lastModifiedDeterminator = null;
 
-            if (is_string($voterDescription)) {
-                if ($voterDescription[0] === '@') {
-                    $voter = $this->container->get($voterDescription);
+            if (is_string($lastModifiedDeterminatorDescription)) {
+                if ($lastModifiedDeterminatorDescription[0] === '@') {
+                    $lastModifiedDeterminator = $this->container->get($lastModifiedDeterminatorDescription);
                 } else {
-                    $voter = new $voterDescription;
+                    $lastModifiedDeterminator = new $lastModifiedDeterminatorDescription;
                 }
             }
 
-            if (is_array($voterDescription)) {
-                $voterClass = key($voterDescription);
-                $voterParameter = current($voterDescription);
-                $voter = new $voterClass($voterParameter);
+            if (is_array($lastModifiedDeterminatorDescription)) {
+                $lastModifiedDeterminatorClass = key($lastModifiedDeterminatorDescription);
+                $lastModifiedDeterminatorParameter = current($lastModifiedDeterminatorDescription);
+                $lastModifiedDeterminator = new $lastModifiedDeterminatorClass($lastModifiedDeterminatorParameter);
             }
 
-            if (!($voter instanceof VoterInterface)) {
+            if (!($lastModifiedDeterminator instanceof LastModifiedDeterminator)) {
                 throw new \RuntimeException(
-                    'The voter class "' . get_class($voter) . '" does not implement ' . VoterInterface::class . '.'
+                    'The class "' . get_class($lastModifiedDeterminator) . '" does not implement ' . LastModifiedDeterminator::class . '.'
                 );
             }
 
-            $this->voters[] = $voter;
+            $this->lastModifiedDeterminators[] = $lastModifiedDeterminator;
         }
     }
 }

@@ -17,7 +17,7 @@ use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
 use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
 use Webfactory\HttpCacheBundle\NotModified\Annotation\ReplaceWithNotModifiedResponse;
 use Webfactory\HttpCacheBundle\NotModified\EventListener;
-use Webfactory\HttpCacheBundle\NotModified\VoterInterface;
+use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 
 /**
  * Tests for the EventListener.
@@ -78,7 +78,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function onKernelControllerDoesNoHarmForNoDeterminedLastModified()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [AbstainingVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [AbstainingLastModifiedDeterminator::class]]));
         $this->expectRegularControllerResponse();
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
@@ -87,7 +87,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function onKernelControllerDoesNoHarmIfNotModifiedSinceHeaderIsNotInRequest()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [OneDayAgoModifiedVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->expectRegularControllerResponse();
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
@@ -96,7 +96,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function onKernelControllerSkipsToModifiedResponseIfLastModifiedIsSmallerThanIfNotModifiedSinceHeader()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [OneDayAgoModifiedVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->request->headers->set('If-Modified-Since', '-1 hour');
         $this->expectNotModifiedResponse();
 
@@ -106,7 +106,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function onKernelControllerSkipsToNotModifiedResponseIfLastModifiedIsEqualToIfNotModifiedSinceHeader()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [FixedDateAgoModifiedVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [FixedDateAgoModifiedLastModifiedDeterminator::class]]));
         $this->request->headers->set('If-Modified-Since', '2000-01-01');
         $this->expectNotModifiedResponse();
 
@@ -116,7 +116,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function onKernelControllerDoesNotReplaceDeterminedControllerIfLastModifiedIsGreaterThanIfNotModifiedSinceHeader()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [OneDayAgoModifiedVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->request->headers->set('If-Modified-Since', '-2 day');
         $this->expectRegularControllerResponse();
 
@@ -128,7 +128,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
      */
     public function onKernelResponseSetsLastModifiedHeaderToResponseIfAvailable()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [OneDayAgoModifiedVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->eventListener->onKernelController($this->filterControllerEvent);
 
         $filterResponseEvent = $this->createFilterResponseEvent($this->filterControllerEvent->getRequest(), $this->response);
@@ -140,7 +140,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function onKernelResponseDoesNotSetLastModifiedHeaderToResponseIfNotAvailable()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [AbstainingVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [AbstainingLastModifiedDeterminator::class]]));
         $this->eventListener->onKernelController($this->filterControllerEvent);
 
         $filterResponseEvent = $this->createFilterResponseEvent($this->filterControllerEvent->getRequest(), $this->response);
@@ -152,7 +152,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     /** @test */
     public function eventListenerDifferentiatesBetweenMultipleRequests()
     {
-        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['voters' => [OneDayAgoModifiedVoter::class]]));
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->eventListener->onKernelController($this->filterControllerEvent);
 
         // first request - should get a last modified
@@ -219,7 +219,7 @@ final class DummyController
     }
 }
 
-final class AbstainingVoter implements VoterInterface
+final class AbstainingLastModifiedDeterminator implements LastModifiedDeterminator
 {
     public function getLastModified(Request $request)
     {
@@ -227,7 +227,7 @@ final class AbstainingVoter implements VoterInterface
     }
 }
 
-final class OneDayAgoModifiedVoter implements VoterInterface
+final class OneDayAgoModifiedLastModifiedDeterminator implements LastModifiedDeterminator
 {
     public function getLastModified(Request $request)
     {
@@ -235,7 +235,7 @@ final class OneDayAgoModifiedVoter implements VoterInterface
     }
 }
 
-final class FixedDateAgoModifiedVoter implements VoterInterface
+final class FixedDateAgoModifiedLastModifiedDeterminator implements LastModifiedDeterminator
 {
     public function getLastModified(Request $request)
     {
