@@ -79,7 +79,7 @@ final class ReplaceWithNotModifiedResponse
 
             if (is_string($lastModifiedDeterminatorDescription)) {
                 if ($lastModifiedDeterminatorDescription[0] === '@') {
-                    $lastModifiedDeterminator = $this->container->get($lastModifiedDeterminatorDescription);
+                    $lastModifiedDeterminator = $this->container->get(substr($lastModifiedDeterminatorDescription, 1));
                 } else {
                     $lastModifiedDeterminator = new $lastModifiedDeterminatorDescription;
                 }

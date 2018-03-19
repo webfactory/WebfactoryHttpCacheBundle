@@ -44,17 +44,14 @@ final class ReplaceWithNotModifiedResponseTest extends \PHPUnit_Framework_TestCa
      */
     public function serviceNameAsLastModifiedDescription()
     {
-        $lastModifiedDeterminatorServiceName = '@my.service';
-        $lastModifiedDeterminatorServiceObject = new MyLastModifedDeterminator();
-
         /** @var ContainerInterface|\PHPUnit_Framework_MockObject_MockObject $container */
         $container = $this->getMock(ContainerInterface::class);
         $container->expects($this->once())
             ->method('get')
-            ->with($lastModifiedDeterminatorServiceName)
-            ->willReturn($lastModifiedDeterminatorServiceObject);
+            ->with('my.service')
+            ->willReturn(new MyLastModifedDeterminator());
 
-        $annotation = new ReplaceWithNotModifiedResponse(['value' => [$lastModifiedDeterminatorServiceName]]);
+        $annotation = new ReplaceWithNotModifiedResponse(['value' => ['@my.service']]);
         $annotation->setContainer($container);
 
         $this->setExpectedException(null);
