@@ -109,7 +109,7 @@ public function registerBundles()
 ## Usage
 
 Choose a controller action you want to possibly replace with a 304 Not Modified response. Write one LastModifiedDeterminator for each
-of the different underlying resources, implementing the ```Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminatorInterface```.
+of the different underlying resources, implementing the ```Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator``` interface.
 
 ```php
 <?php
@@ -117,12 +117,13 @@ of the different underlying resources, implementing the ```Webfactory\HttpCacheB
 namespace App\Caching;
 
 use App\Entity\PostRepository;
-use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminatorInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 
 /**
  * Returns the publishing date of the latest posts.
  */
-final class PostsLastModifiedDeterminator implements LastModifiedDeterminatorInterface
+final class PostsLastModifiedDeterminator implements LastModifiedDeterminator
 {
     /** @var EntityRepository */
     private $postRepository;
