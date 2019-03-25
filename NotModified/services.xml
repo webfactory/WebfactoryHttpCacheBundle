@@ -7,7 +7,7 @@
         <service class="Webfactory\HttpCacheBundle\NotModified\EventListener" public="true">
             <argument type="service" id="annotation_reader" />
             <argument type="service" id="service_container" />
-            <tag name="kernel.event_listener" event="kernel.controller" />
+            <tag name="kernel.event_listener" event="kernel.controller" priority="-200" />
             <tag name="kernel.event_listener" event="kernel.response" />
         </service>
     </services>
