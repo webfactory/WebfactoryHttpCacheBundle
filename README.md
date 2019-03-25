@@ -205,13 +205,11 @@ To combine multiple LastModifiedDeterminators, simply add all of them to the ann
  
 The latest last modified date determines the last modified date of the response.
 
-
-
 ## Credits, Copyright and License
 
 This bundle was started at webfactory GmbH, Bonn.
 
-- <http://www.webfactory.de>
-- <http://twitter.com/webfactory>
+- <https://www.webfactory.de>
+- <https://twitter.com/webfactory>
 
-Copyright 2018 webfactory GmbH, Bonn. Code released under [the MIT license](LICENSE).
+Copyright 2018-2019 webfactory GmbH, Bonn. Code released under [the MIT license](LICENSE).
