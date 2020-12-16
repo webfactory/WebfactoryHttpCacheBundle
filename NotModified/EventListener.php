@@ -38,14 +38,20 @@ final class EventListener
     private $lastModified;
 
     /**
+     * @var bool Symfony kernel.debug mode
+     */
+    private $debug;
+
+    /**
      * @param Reader $reader
      * @param ContainerInterface $container
      */
-    public function __construct(Reader $reader, ContainerInterface $container)
+    public function __construct(Reader $reader, ContainerInterface $container, bool $debug = false)
     {
         $this->reader = $reader;
         $this->container = $container;
         $this->lastModified = new \SplObjectStorage();
+        $this->debug = $debug;
     }
 
     /**
@@ -71,6 +77,12 @@ final class EventListener
         }
 
         $this->lastModified[$request] = $lastModified;
+
+        /* Never send 304s for kernel.debug = true: This leads to confusing
+           behavior, for example if you don't see updates to Twig templates. */
+        if ($this->debug) {
+            return;
+        }
 
         $response = new Response();
         $response->setLastModified($lastModified);
@@ -108,7 +120,7 @@ final class EventListener
             return null;
         }
 
-        list($class, $methodName) = $controllerCallable;
+        [$class, $methodName] = $controllerCallable;
         $method = new \ReflectionMethod($class, $methodName);
 
         /** @var ReplaceWithNotModifiedResponse|null $annotation */
