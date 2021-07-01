@@ -10,6 +10,8 @@
 namespace Webfactory\HttpCacheBundle\NotModified;
 
 use Doctrine\Common\Annotations\Reader;
+use ReflectionMethod;
+use SplObjectStorage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
@@ -33,7 +35,7 @@ final class EventListener
      * Maps (master and sub) requests to their corresponding last modified date. This date is determined by the
      * ReplaceWithNotModifiedResponse annotation of the corresponding controller's action.
      *
-     * @var \SplObjectStorage
+     * @var SplObjectStorage
      */
     private $lastModified;
 
@@ -42,15 +44,11 @@ final class EventListener
      */
     private $debug;
 
-    /**
-     * @param Reader $reader
-     * @param ContainerInterface $container
-     */
     public function __construct(Reader $reader, ContainerInterface $container, bool $debug = false)
     {
         $this->reader = $reader;
         $this->container = $container;
-        $this->lastModified = new \SplObjectStorage();
+        $this->lastModified = new SplObjectStorage();
         $this->debug = $debug;
     }
 
@@ -59,8 +57,6 @@ final class EventListener
      * If it determines that the underlying resources for the response were not modified after the "If-Modified-Since"
      * header in the request, replace the determined controller action with a minimal action that just returns an
      * "empty" response with a 304 Not Modified HTTP status code.
-     *
-     * @param FilterControllerEvent $event
      */
     public function onKernelController(FilterControllerEvent $event)
     {
@@ -97,8 +93,6 @@ final class EventListener
     /**
      * If a last modified date was determined for the current (master or sub) request, set it to the response so the
      * client can use it for the "If-Modified-Since" header in subsequent requests.
-     *
-     * @param FilterResponseEvent $event
      */
     public function onKernelResponse(FilterResponseEvent $event)
     {
@@ -112,6 +106,7 @@ final class EventListener
 
     /**
      * @param $controllerCallable callable PHP callback pointing to the method to reflect on.
+     *
      * @return ReplaceWithNotModifiedResponse|null The annotation, if found. Null otherwise.
      */
     private function findAnnotation(callable $controllerCallable)
@@ -121,10 +116,11 @@ final class EventListener
         }
 
         [$class, $methodName] = $controllerCallable;
-        $method = new \ReflectionMethod($class, $methodName);
+        $method = new ReflectionMethod($class, $methodName);
 
         /** @var ReplaceWithNotModifiedResponse|null $annotation */
         $annotation = $this->reader->getMethodAnnotation($method, ReplaceWithNotModifiedResponse::class);
+
         return $annotation;
     }
 }

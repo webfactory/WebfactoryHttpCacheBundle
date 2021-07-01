@@ -9,7 +9,10 @@
 
 namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 
+use DateTime;
 use Doctrine\Common\Annotations\Reader;
+use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit_Framework_TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +25,7 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 /**
  * Tests for the EventListener.
  */
-final class EventListenerTest extends \PHPUnit_Framework_TestCase
+final class EventListenerTest extends PHPUnit_Framework_TestCase
 {
     /**
      * System under test.
@@ -31,13 +34,13 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
      */
     private $eventListener;
 
-    /** @var Reader|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var Reader|PHPUnit_Framework_MockObject_MockObject */
     private $reader;
 
-    /** @var ContainerInterface|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject */
     private $container;
 
-    /** @var FilterControllerEvent|\PHPUnit_Framework_MockObject_MockObject */
+    /** @var FilterControllerEvent|PHPUnit_Framework_MockObject_MockObject */
     private $filterControllerEvent;
 
     /** @var Request */
@@ -191,9 +194,7 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param Request $request
-     * @param Response $response
-     * @return \PHPUnit_Framework_MockObject_MockObject|FilterResponseEvent
+     * @return PHPUnit_Framework_MockObject_MockObject|FilterResponseEvent
      */
     private function createFilterResponseEvent(Request $request, Response $response)
     {
@@ -208,8 +209,6 @@ final class EventListenerTest extends \PHPUnit_Framework_TestCase
         return $filterResponseEvent;
     }
 }
-
-
 
 final class DummyController
 {
@@ -231,7 +230,7 @@ final class OneDayAgoModifiedLastModifiedDeterminator implements LastModifiedDet
 {
     public function getLastModified(Request $request)
     {
-        return new \DateTime('-1 day');
+        return new DateTime('-1 day');
     }
 }
 
@@ -239,6 +238,6 @@ final class FixedDateAgoModifiedLastModifiedDeterminator implements LastModified
 {
     public function getLastModified(Request $request)
     {
-        return new \DateTime('2000-01-01');
+        return new DateTime('2000-01-01');
     }
 }

@@ -14,7 +14,7 @@ class WebfactoryHttpCacheExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container)
     {
-        $locator = new FileLocator(__DIR__ . '/../NotModified');
+        $locator = new FileLocator(__DIR__.'/../NotModified');
         $yamlLoader = new XmlFileLoader($container, $locator);
         $yamlLoader->load('services.xml');
     }
