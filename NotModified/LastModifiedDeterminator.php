@@ -9,6 +9,7 @@
 
 namespace Webfactory\HttpCacheBundle\NotModified;
 
+use DateTime;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -21,8 +22,7 @@ use Symfony\Component\HttpFoundation\Request;
 interface LastModifiedDeterminator
 {
     /**
-     * @param Request $request
-     * @return \DateTime|null
+     * @return DateTime|null
      */
     public function getLastModified(Request $request);
 }
