@@ -10,7 +10,6 @@ jobs:
     open-pr-for-cs-violations:
         name: PHP-CS-Fixer
         runs-on: ubuntu-20.04
-        if: github.actor != 'dependabot[bot]'
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v2
