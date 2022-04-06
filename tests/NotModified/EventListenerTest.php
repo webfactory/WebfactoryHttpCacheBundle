@@ -116,6 +116,18 @@ final class EventListenerTest extends TestCase
     }
 
     /** @test */
+    public function onKernelControllerAlwaysRunsControllerInKernelDebugMode(): void
+    {
+        $this->kernel->method('isDebug')->willReturn(true);
+        $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
+        $this->request->headers->set('If-Modified-Since', '-1 hour');
+
+        $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        $this->assertRegularControllerResponse();
+    }
+
+    /** @test */
     public function onKernelControllerSkipsToNotModifiedResponseIfLastModifiedIsEqualToIfNotModifiedSinceHeader(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [FixedDateAgoModifiedLastModifiedDeterminator::class]]));
