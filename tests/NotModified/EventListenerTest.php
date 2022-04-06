@@ -12,8 +12,8 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 use Closure;
 use DateTime;
 use Doctrine\Common\Annotations\Reader;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,13 +39,13 @@ final class EventListenerTest extends TestCase
      */
     private $eventListener;
 
-    /** @var Reader|PHPUnit_Framework_MockObject_MockObject */
+    /** @var Reader|MockObject */
     private $reader;
 
-    /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject */
+    /** @var ContainerInterface|MockObject */
     private $container;
 
-    /** @var ControllerEvent|PHPUnit_Framework_MockObject_MockObject */
+    /** @var ControllerEvent|MockObject */
     private $filterControllerEvent;
 
     /** @var Request */
@@ -56,7 +56,7 @@ final class EventListenerTest extends TestCase
 
     private $callable;
 
-    /** @var KernelInterface|PHPUnit_Framework_MockObject_MockObject */
+    /** @var KernelInterface|MockObject */
     private $kernel;
 
     /**
@@ -64,7 +64,7 @@ final class EventListenerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->kernel = $this->createMock(HttpKernelInterface::class);
+        $this->kernel = $this->createMock(KernelInterface::class);
         $this->callable = [DummyController::class, 'action'];
         $this->request = new Request();
         $this->response = new Response();
@@ -118,7 +118,7 @@ final class EventListenerTest extends TestCase
     /** @test */
     public function onKernelControllerAlwaysRunsControllerInKernelDebugMode(): void
     {
-        $this->kernel->method('isDebug')->willReturn(true);
+        $this->eventListener = new EventListener($this->reader, $this->container, true);
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->request->headers->set('If-Modified-Since', '-1 hour');
 
