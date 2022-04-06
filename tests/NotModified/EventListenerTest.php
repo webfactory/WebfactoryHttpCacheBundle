@@ -11,21 +11,25 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 
 use DateTime;
 use Doctrine\Common\Annotations\Reader;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit_Framework_TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
+use Symfony\Component\HttpKernel\KernelInterface;
 use Webfactory\HttpCacheBundle\NotModified\Annotation\ReplaceWithNotModifiedResponse;
 use Webfactory\HttpCacheBundle\NotModified\EventListener;
 use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 
 /**
  * Tests for the EventListener.
+ * @group time-sensitive
  */
-final class EventListenerTest extends PHPUnit_Framework_TestCase
+final class EventListenerTest extends TestCase
 {
     /**
      * System under test.
@@ -40,7 +44,7 @@ final class EventListenerTest extends PHPUnit_Framework_TestCase
     /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject */
     private $container;
 
-    /** @var FilterControllerEvent|PHPUnit_Framework_MockObject_MockObject */
+    /** @var ControllerEvent|PHPUnit_Framework_MockObject_MockObject */
     private $filterControllerEvent;
 
     /** @var Request */
@@ -49,87 +53,93 @@ final class EventListenerTest extends PHPUnit_Framework_TestCase
     /** @var Response */
     private $response;
 
+    private $callable;
+
+    /** @var KernelInterface|PHPUnit_Framework_MockObject_MockObject */
+    private $kernel;
+
     /**
      * @see \PHPUnit_Framework_TestCase::setUp()
      */
-    protected function setUp()
+    protected function setUp(): void
     {
+        $this->kernel = $this->createMock(HttpKernelInterface::class);
+        $this->callable = [DummyController::class, 'action'];
         $this->request = new Request();
         $this->response = new Response();
-        $this->filterControllerEvent = $this->getMockBuilder(FilterControllerEvent::class)->disableOriginalConstructor()->getMock();
-        $this->filterControllerEvent->expects($this->any())
-            ->method('getController')
-            ->willReturn([DummyController::class, 'action']);
-        $this->filterControllerEvent->expects($this->any())
-            ->method('getRequest')
-            ->willReturn($this->request);
-
-        $this->reader = $this->getMock(Reader::class);
-        $this->container = $this->getMock(ContainerInterface::class);
+        $this->filterControllerEvent = new ControllerEvent($this->kernel, $this->callable, $this->request, HttpKernelInterface::MASTER_REQUEST);
+        $this->reader = $this->createMock(Reader::class);
+        $this->container = $this->createMock(ContainerInterface::class);
         $this->eventListener = new EventListener($this->reader, $this->container);
     }
 
     /** @test */
-    public function onKernelControllerDoesNoHarmForMissingAnnotation()
+    public function onKernelControllerDoesNoHarmForMissingAnnotation(): void
     {
-        $this->expectRegularControllerResponse();
         $this->setUpAnnotationReaderToReturn(null);
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        $this->assertRegularControllerResponse();
     }
 
     /** @test */
-    public function onKernelControllerDoesNoHarmForNoDeterminedLastModified()
+    public function onKernelControllerDoesNoHarmForNoDeterminedLastModified(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [AbstainingLastModifiedDeterminator::class]]));
-        $this->expectRegularControllerResponse();
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        $this->assertRegularControllerResponse();
     }
 
     /** @test */
-    public function onKernelControllerDoesNoHarmIfNotModifiedSinceHeaderIsNotInRequest()
+    public function onKernelControllerDoesNoHarmIfNotModifiedSinceHeaderIsNotInRequest(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
-        $this->expectRegularControllerResponse();
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        $this->assertRegularControllerResponse();
     }
 
     /** @test */
-    public function onKernelControllerSkipsToModifiedResponseIfLastModifiedIsSmallerThanIfNotModifiedSinceHeader()
+    public function onKernelControllerSkipsToModifiedResponseIfLastModifiedIsSmallerThanIfNotModifiedSinceHeader(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->request->headers->set('If-Modified-Since', '-1 hour');
-        $this->expectNotModifiedResponse();
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        $this->assertNotModifiedResponse();
     }
 
     /** @test */
-    public function onKernelControllerSkipsToNotModifiedResponseIfLastModifiedIsEqualToIfNotModifiedSinceHeader()
+    public function onKernelControllerSkipsToNotModifiedResponseIfLastModifiedIsEqualToIfNotModifiedSinceHeader(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [FixedDateAgoModifiedLastModifiedDeterminator::class]]));
         $this->request->headers->set('If-Modified-Since', '2000-01-01');
-        $this->expectNotModifiedResponse();
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        $this->assertNotModifiedResponse();
     }
 
     /** @test */
-    public function onKernelControllerDoesNotReplaceDeterminedControllerIfLastModifiedIsGreaterThanIfNotModifiedSinceHeader()
+    public function onKernelControllerDoesNotReplaceDeterminedControllerIfLastModifiedIsGreaterThanIfNotModifiedSinceHeader(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->request->headers->set('If-Modified-Since', '-2 day');
-        $this->expectRegularControllerResponse();
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        $this->assertRegularControllerResponse();
     }
 
     /**
      * @test
      */
-    public function onKernelResponseSetsLastModifiedHeaderToResponseIfAvailable()
+    public function onKernelResponseSetsLastModifiedHeaderToResponseIfAvailable(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->eventListener->onKernelController($this->filterControllerEvent);
@@ -137,11 +147,11 @@ final class EventListenerTest extends PHPUnit_Framework_TestCase
         $filterResponseEvent = $this->createFilterResponseEvent($this->filterControllerEvent->getRequest(), $this->response);
         $this->eventListener->onKernelResponse($filterResponseEvent);
 
-        $this->assertNotNull($this->response->getLastModified());
+        self::assertEquals(\DateTime::createFromFormat('U', time() - 86400), $this->response->getLastModified());
     }
 
     /** @test */
-    public function onKernelResponseDoesNotSetLastModifiedHeaderToResponseIfNotAvailable()
+    public function onKernelResponseDoesNotSetLastModifiedHeaderToResponseIfNotAvailable(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [AbstainingLastModifiedDeterminator::class]]));
         $this->eventListener->onKernelController($this->filterControllerEvent);
@@ -149,11 +159,11 @@ final class EventListenerTest extends PHPUnit_Framework_TestCase
         $filterResponseEvent = $this->createFilterResponseEvent($this->filterControllerEvent->getRequest(), $this->response);
         $this->eventListener->onKernelResponse($filterResponseEvent);
 
-        $this->assertNull($this->response->getLastModified());
+        self::assertNull($this->response->getLastModified());
     }
 
     /** @test */
-    public function eventListenerDifferentiatesBetweenMultipleRequests()
+    public function eventListenerDifferentiatesBetweenMultipleRequests(): void
     {
         $this->setUpAnnotationReaderToReturn(new ReplaceWithNotModifiedResponse(['value' => [OneDayAgoModifiedLastModifiedDeterminator::class]]));
         $this->eventListener->onKernelController($this->filterControllerEvent);
@@ -161,58 +171,49 @@ final class EventListenerTest extends PHPUnit_Framework_TestCase
         // first request - should get a last modified
         $filterResponseEvent = $this->createFilterResponseEvent($this->filterControllerEvent->getRequest(), $this->response);
         $this->eventListener->onKernelResponse($filterResponseEvent);
-        $this->assertNotNull($this->response->getLastModified());
+        self::assertNotNull($this->response->getLastModified());
 
         // event for another request - it's response should not get a last modified
         $anotherRequest = new Request();
         $anotherResponse = new Response();
         $anotherFilterResponseEvent = $this->createFilterResponseEvent($anotherRequest, $anotherResponse);
         $this->eventListener->onKernelResponse($anotherFilterResponseEvent);
-        $this->assertNull($anotherResponse->getLastModified());
+        self::assertNull($anotherResponse->getLastModified());
     }
 
     /**
      * @param object|null $annotation
      */
-    private function setUpAnnotationReaderToReturn($annotation = null)
+    private function setUpAnnotationReaderToReturn($annotation = null): void
     {
-        $this->reader->expects($this->any())
-            ->method('getMethodAnnotation')
-            ->willReturn($annotation);
+        $this->reader->method('getMethodAnnotation')->willReturn($annotation);
     }
 
-    private function expectRegularControllerResponse()
+    private function assertRegularControllerResponse(): void
     {
-        $this->filterControllerEvent->expects($this->never())
-            ->method('setController');
+        self::assertSame($this->callable, $this->filterControllerEvent->getController());
     }
 
-    private function expectNotModifiedResponse()
+    private function assertNotModifiedResponse(): void
     {
-        $this->filterControllerEvent->expects($this->once())
-            ->method('setController');
+        $closure = $this->filterControllerEvent->getController();
+
+        self::assertInstanceOf(\Closure::class, $closure);
+
+        $response = $closure();
+        self::assertInstanceOf(Response::class, $response);
+        self::assertSame(304, $response->getStatusCode());
     }
 
-    /**
-     * @return PHPUnit_Framework_MockObject_MockObject|FilterResponseEvent
-     */
-    private function createFilterResponseEvent(Request $request, Response $response)
+    private function createFilterResponseEvent(Request $request, Response $response): ResponseEvent
     {
-        $filterResponseEvent = $this->getMockBuilder(FilterResponseEvent::class)->disableOriginalConstructor()->getMock();
-        $filterResponseEvent->expects($this->any())
-            ->method('getRequest')
-            ->willReturn($request);
-        $filterResponseEvent->expects($this->any())
-            ->method('getResponse')
-            ->willReturn($response);
-
-        return $filterResponseEvent;
+        return new ResponseEvent($this->kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
     }
 }
 
 final class DummyController
 {
-    public function action()
+    public static function action(): Response
     {
         return new Response();
     }
@@ -220,7 +221,7 @@ final class DummyController
 
 final class AbstainingLastModifiedDeterminator implements LastModifiedDeterminator
 {
-    public function getLastModified(Request $request)
+    public function getLastModified(Request $request): ?DateTime
     {
         return null;
     }
@@ -228,15 +229,15 @@ final class AbstainingLastModifiedDeterminator implements LastModifiedDeterminat
 
 final class OneDayAgoModifiedLastModifiedDeterminator implements LastModifiedDeterminator
 {
-    public function getLastModified(Request $request)
+    public function getLastModified(Request $request): DateTime
     {
-        return new DateTime('-1 day');
+        return \DateTime::createFromFormat('U', time() - 86400);
     }
 }
 
 final class FixedDateAgoModifiedLastModifiedDeterminator implements LastModifiedDeterminator
 {
-    public function getLastModified(Request $request)
+    public function getLastModified(Request $request): DateTime
     {
         return new DateTime('2000-01-01');
     }
