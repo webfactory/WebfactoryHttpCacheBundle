@@ -1,43 +1,49 @@
 {
-  "name": "webfactory/http-cache-bundle",
-  "description": "Symfony bundle to ease HTTP cache validation via last modified header",
-  "keywords": [
-    "caching",
-    "http",
-    "304",
-    "notmodified",
-    "ifnotmodifiedsince"
-  ],
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "webfactory GmbH",
-      "email": "info@webfactory.de",
-      "homepage": "http://www.webfactory.de",
-      "role": "Developer"
+    "name": "webfactory/http-cache-bundle",
+    "description": "Symfony bundle to ease HTTP cache validation via last modified header",
+    "keywords": [
+        "caching",
+        "http",
+        "304",
+        "notmodified",
+        "ifnotmodifiedsince"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "webfactory GmbH",
+            "email": "info@webfactory.de",
+            "homepage": "http://www.webfactory.de",
+            "role": "Developer"
+        }
+    ],
+
+    "require": {
+        "php": "^7.1|8.0.*|8.1.*",
+        "symfony/config": "^4.4 | ^5.0",
+        "symfony/dependency-injection": "^4.4 | ^5.0",
+        "symfony/http-foundation": "^4.4 | ^5.0",
+        "symfony/http-kernel": "^4.4 | ^5.0",
+        "doctrine/annotations": "^1.0"
+    },
+
+    "require-dev": {
+        "phpunit/phpunit": "^8.5|^9.0",
+        "symfony/phpunit-bridge": ">=5.0"
+    },
+
+    "suggest": {
+        "webfactory/wfdmeta-bundle": "Invalidate caches based on meta data tracked with wfDynamic"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Webfactory\\HttpCacheBundle\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webfactory\\HttpCacheBundle\\Tests\\": "tests"
+        }
     }
-  ],
-
-  "require": {
-    "php": "^7.1",
-    "symfony/config": "^2.8 || ^3.0 || ^4.0",
-    "symfony/dependency-injection": "^2.8 || ^3.0 || ^4.0",
-    "symfony/http-foundation": "^2.8 || ^3.0 || ^4.0",
-    "symfony/http-kernel": "^2.8 || ^3.0 || ^4.0",
-    "doctrine/annotations": "^1.0"
-  },
-
-  "require-dev": {
-    "phpunit/phpunit": "^4.8.0"
-  },
-
-  "suggest": {
-    "webfactory/wfdmeta-bundle": "Invalidate caches based on meta data tracked with wfDynamic"
-  },
-
-  "autoload": {
-    "psr-4": {
-      "Webfactory\\HttpCacheBundle\\": ""
-    }
-  }
 }

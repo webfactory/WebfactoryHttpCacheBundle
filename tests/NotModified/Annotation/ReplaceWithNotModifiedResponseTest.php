@@ -10,8 +10,8 @@
 namespace Webfactory\HttpCacheBundle\Tests\NotModified\Annotation;
 
 use DateTime;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
-use PHPUnit_Framework_TestCase;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,24 +21,24 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 /**
  * Tests for the ReplaceWithNotModifiedResponse annotation.
  */
-final class ReplaceWithNotModifiedResponseTest extends PHPUnit_Framework_TestCase
+final class ReplaceWithNotModifiedResponseTest extends TestCase
 {
     /**
      * @test
      */
     public function lastModifiedDescriptionsCannotBeEmpty()
     {
-        $this->setExpectedException(RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $annotation = new ReplaceWithNotModifiedResponse(['value' => []]);
         $annotation->determineLastModified(new Request());
     }
 
     /**
      * @test
+     * @doesNotPerformAssertions
      */
     public function stringAsSimpleLastModifiedDescription()
     {
-        $this->setExpectedException(null);
         $annotation = new ReplaceWithNotModifiedResponse(['value' => [MyLastModifedDeterminator::class]]);
         $annotation->determineLastModified(new Request());
     }
@@ -49,7 +49,7 @@ final class ReplaceWithNotModifiedResponseTest extends PHPUnit_Framework_TestCas
     public function serviceNameAsLastModifiedDescription()
     {
         /** @var ContainerInterface|PHPUnit_Framework_MockObject_MockObject $container */
-        $container = $this->getMock(ContainerInterface::class);
+        $container = $this->createMock(ContainerInterface::class);
         $container->expects($this->once())
             ->method('get')
             ->with('my.service')
@@ -58,16 +58,15 @@ final class ReplaceWithNotModifiedResponseTest extends PHPUnit_Framework_TestCas
         $annotation = new ReplaceWithNotModifiedResponse(['value' => ['@my.service']]);
         $annotation->setContainer($container);
 
-        $this->setExpectedException(null);
         $annotation->determineLastModified(new Request());
     }
 
     /**
      * @test
+     * @doesNotPerformAssertions
      */
     public function arrayAslastModifiedDeterminatorDescriptionWithConstructorArguments()
     {
-        $this->setExpectedException(null);
         $annotation = new ReplaceWithNotModifiedResponse(['value' => [[MyLastModifedDeterminator::class => new DateTime('2000-01-01')]]]);
         $annotation->determineLastModified(new Request());
     }
@@ -77,23 +76,22 @@ final class ReplaceWithNotModifiedResponseTest extends PHPUnit_Framework_TestCas
      */
     public function lastModifiedDeterminatorsHaveToImplementInterface()
     {
-        $this->setExpectedException(RuntimeException::class);
+        $this->expectException(RuntimeException::class);
         $annotation = new ReplaceWithNotModifiedResponse(['value' => [FakeLastModifiedDeterminatorWithoutInterface::class]]);
         $annotation->determineLastModified(new Request());
     }
 
     /**
      * @test
+     * @group time-sensitive
      */
     public function determineLastModifiedDeterminesLastModifiedOfOneDeterminator()
     {
         $annotation = new ReplaceWithNotModifiedResponse(['value' => [MyLastModifedDeterminator::class]]);
-        $this->assertEquals(
-            new DateTime(),
-            $annotation->determineLastModified(new Request()),
-            '',
-            $allowedDeltaInSeconds = 3
-        );
+
+        $lastModified = $annotation->determineLastModified(new Request());
+
+        self::assertEquals(DateTime::createFromFormat('U', time()), $lastModified);
     }
 
     /**
@@ -101,11 +99,13 @@ final class ReplaceWithNotModifiedResponseTest extends PHPUnit_Framework_TestCas
      */
     public function determineLastModifiedDeterminesLastModifiedOfMultipleDeterminators()
     {
-        $annotation = new ReplaceWithNotModifiedResponse(['value' => [
-            [MyLastModifedDeterminator::class => new DateTime('2001-01-01')],
-            [MyLastModifedDeterminator::class => new DateTime('2003-01-01')],
-            [MyLastModifedDeterminator::class => new DateTime('2002-01-01')],
-        ]]);
+        $annotation = new ReplaceWithNotModifiedResponse([
+            'value' => [
+                [MyLastModifedDeterminator::class => new DateTime('2001-01-01')],
+                [MyLastModifedDeterminator::class => new DateTime('2003-01-01')],
+                [MyLastModifedDeterminator::class => new DateTime('2002-01-01')],
+            ],
+        ]);
         $this->assertEquals(new DateTime('2003-01-01'), $annotation->determineLastModified(new Request()));
     }
 }
@@ -121,7 +121,7 @@ final class MyLastModifedDeterminator implements LastModifiedDeterminator
 
     public function __construct(DateTime $lastModified = null)
     {
-        $this->lastModified = $lastModified ?: new DateTime();
+        $this->lastModified = $lastModified ?: DateTime::createFromFormat('U', time());
     }
 
     public function getLastModified(Request $request)

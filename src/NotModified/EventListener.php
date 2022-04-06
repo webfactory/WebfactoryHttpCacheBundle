@@ -14,8 +14,8 @@ use ReflectionMethod;
 use SplObjectStorage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
+use Symfony\Component\HttpKernel\Event\ControllerEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Webfactory\HttpCacheBundle\NotModified\Annotation\ReplaceWithNotModifiedResponse;
 
 /**
@@ -58,7 +58,7 @@ final class EventListener
      * header in the request, replace the determined controller action with a minimal action that just returns an
      * "empty" response with a 304 Not Modified HTTP status code.
      */
-    public function onKernelController(FilterControllerEvent $event)
+    public function onKernelController(ControllerEvent $event)
     {
         $annotation = $this->findAnnotation($event->getController());
         if (!$annotation) {
@@ -94,7 +94,7 @@ final class EventListener
      * If a last modified date was determined for the current (master or sub) request, set it to the response so the
      * client can use it for the "If-Modified-Since" header in subsequent requests.
      */
-    public function onKernelResponse(FilterResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event)
     {
         $request = $event->getRequest();
         $response = $event->getResponse();
