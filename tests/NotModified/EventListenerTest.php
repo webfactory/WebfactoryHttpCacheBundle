@@ -9,11 +9,11 @@
 
 namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 
+use Closure;
 use DateTime;
 use Doctrine\Common\Annotations\Reader;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
-use PHPUnit_Framework_TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,6 +27,7 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 
 /**
  * Tests for the EventListener.
+ *
  * @group time-sensitive
  */
 final class EventListenerTest extends TestCase
@@ -147,7 +148,7 @@ final class EventListenerTest extends TestCase
         $filterResponseEvent = $this->createFilterResponseEvent($this->filterControllerEvent->getRequest(), $this->response);
         $this->eventListener->onKernelResponse($filterResponseEvent);
 
-        self::assertEquals(\DateTime::createFromFormat('U', time() - 86400), $this->response->getLastModified());
+        self::assertEquals(DateTime::createFromFormat('U', time() - 86400), $this->response->getLastModified());
     }
 
     /** @test */
@@ -198,7 +199,7 @@ final class EventListenerTest extends TestCase
     {
         $closure = $this->filterControllerEvent->getController();
 
-        self::assertInstanceOf(\Closure::class, $closure);
+        self::assertInstanceOf(Closure::class, $closure);
 
         $response = $closure();
         self::assertInstanceOf(Response::class, $response);
@@ -231,7 +232,7 @@ final class OneDayAgoModifiedLastModifiedDeterminator implements LastModifiedDet
 {
     public function getLastModified(Request $request): DateTime
     {
-        return \DateTime::createFromFormat('U', time() - 86400);
+        return DateTime::createFromFormat('U', time() - 86400);
     }
 }
 

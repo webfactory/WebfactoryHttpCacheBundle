@@ -12,7 +12,6 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified\Annotation;
 use DateTime;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
-use PHPUnit_Framework_TestCase;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -92,7 +91,7 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
 
         $lastModified = $annotation->determineLastModified(new Request());
 
-        self::assertEquals(\DateTime::createFromFormat('U', time()), $lastModified);
+        self::assertEquals(DateTime::createFromFormat('U', time()), $lastModified);
     }
 
     /**
@@ -122,7 +121,7 @@ final class MyLastModifedDeterminator implements LastModifiedDeterminator
 
     public function __construct(DateTime $lastModified = null)
     {
-        $this->lastModified = $lastModified ?: \DateTime::createFromFormat('U', time());
+        $this->lastModified = $lastModified ?: DateTime::createFromFormat('U', time());
     }
 
     public function getLastModified(Request $request)
