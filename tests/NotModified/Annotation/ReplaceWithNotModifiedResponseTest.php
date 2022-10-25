@@ -35,6 +35,7 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
 
     /**
      * @test
+     *
      * @doesNotPerformAssertions
      */
     public function stringAsSimpleLastModifiedDescription()
@@ -63,6 +64,7 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
 
     /**
      * @test
+     *
      * @doesNotPerformAssertions
      */
     public function arrayAslastModifiedDeterminatorDescriptionWithConstructorArguments()
@@ -83,6 +85,7 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
 
     /**
      * @test
+     *
      * @group time-sensitive
      */
     public function determineLastModifiedDeterminesLastModifiedOfOneDeterminator()
