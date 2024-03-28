@@ -144,11 +144,11 @@ services:
             - @repository_post
 `
 
-and note the service name to the Annotation:
+and put the service name into the attribute:
 
     #[ReplaceWithNotModifiedResponse(["@app_caching_latest_posts"])]
 
-To combine multiple LastModifiedDeterminators, simply add all of them to the annotation:
+To combine multiple LastModifiedDeterminators, simply add all of them to the attribute:
  
     #[ReplaceWithNotModifiedResponse([
         "@app_caching_latest_posts",
