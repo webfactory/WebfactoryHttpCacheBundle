@@ -16,7 +16,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Webfactory\HttpCacheBundle\NotModified\Annotation\ReplaceWithNotModifiedResponse;
+use Webfactory\HttpCacheBundle\NotModified;
 
 /**
  * Symfony EventListener for adding a "last modified" header to the response on the one hand. On the other hand, it
@@ -118,8 +118,24 @@ final class EventListener
         [$class, $methodName] = $controllerCallable;
         $method = new ReflectionMethod($class, $methodName);
 
+        if (PHP_MAJOR_VERSION >= 8) {
+            $attributes = $method->getAttributes(NotModified\Attribute\ReplaceWithNotModifiedResponse::class);
+
+            if ($attributes) {
+                return $attributes[0]->newInstance();
+            }
+        }
+
         /** @var ReplaceWithNotModifiedResponse|null $annotation */
-        $annotation = $this->reader->getMethodAnnotation($method, ReplaceWithNotModifiedResponse::class);
+        $annotation = $this->reader->getMethodAnnotation($method, NotModified\Annotation\ReplaceWithNotModifiedResponse::class);
+
+        if ($annotation) {
+            trigger_deprecation(
+                'webfactory/http-cache-bundle',
+                '1.4.0',
+                'Configuring webfactory/http-cache-bundle with annotations is deprecated, use attributes instead.'
+            );
+        }
 
         return $annotation;
     }
