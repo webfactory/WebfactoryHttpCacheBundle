@@ -29,8 +29,8 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
     public function lastModifiedDescriptionsCannotBeEmpty()
     {
         $this->expectException(RuntimeException::class);
-        $annotation = new ReplaceWithNotModifiedResponse([]);
-        $annotation->determineLastModified(new Request());
+        $attribute = new ReplaceWithNotModifiedResponse([]);
+        $attribute->determineLastModified(new Request());
     }
 
     /**
@@ -40,8 +40,8 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
      */
     public function stringAsSimpleLastModifiedDescription()
     {
-        $annotation = new ReplaceWithNotModifiedResponse([MyLastModifedDeterminator::class]);
-        $annotation->determineLastModified(new Request());
+        $attribute = new ReplaceWithNotModifiedResponse([MyLastModifedDeterminator::class]);
+        $attribute->determineLastModified(new Request());
     }
 
     /**
@@ -56,10 +56,10 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
             ->with('my.service')
             ->willReturn(new MyLastModifedDeterminator());
 
-        $annotation = new ReplaceWithNotModifiedResponse(['@my.service']);
-        $annotation->setContainer($container);
+        $attribute = new ReplaceWithNotModifiedResponse(['@my.service']);
+        $attribute->setContainer($container);
 
-        $annotation->determineLastModified(new Request());
+        $attribute->determineLastModified(new Request());
     }
 
     /**
@@ -69,8 +69,8 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
      */
     public function arrayAslastModifiedDeterminatorDescriptionWithConstructorArguments()
     {
-        $annotation = new ReplaceWithNotModifiedResponse([[MyLastModifedDeterminator::class => new DateTime('2000-01-01')]]);
-        $annotation->determineLastModified(new Request());
+        $attribute = new ReplaceWithNotModifiedResponse([[MyLastModifedDeterminator::class => new DateTime('2000-01-01')]]);
+        $attribute->determineLastModified(new Request());
     }
 
     /**
@@ -79,8 +79,8 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
     public function lastModifiedDeterminatorsHaveToImplementInterface()
     {
         $this->expectException(RuntimeException::class);
-        $annotation = new ReplaceWithNotModifiedResponse([FakeLastModifiedDeterminatorWithoutInterface::class]);
-        $annotation->determineLastModified(new Request());
+        $attribute = new ReplaceWithNotModifiedResponse([FakeLastModifiedDeterminatorWithoutInterface::class]);
+        $attribute->determineLastModified(new Request());
     }
 
     /**
@@ -90,9 +90,9 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
      */
     public function determineLastModifiedDeterminesLastModifiedOfOneDeterminator()
     {
-        $annotation = new ReplaceWithNotModifiedResponse([MyLastModifedDeterminator::class]);
+        $attribute = new ReplaceWithNotModifiedResponse([MyLastModifedDeterminator::class]);
 
-        $lastModified = $annotation->determineLastModified(new Request());
+        $lastModified = $attribute->determineLastModified(new Request());
 
         self::assertEquals(DateTime::createFromFormat('U', time()), $lastModified);
     }
@@ -102,12 +102,12 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
      */
     public function determineLastModifiedDeterminesLastModifiedOfMultipleDeterminators()
     {
-        $annotation = new ReplaceWithNotModifiedResponse([
+        $attribute = new ReplaceWithNotModifiedResponse([
             [MyLastModifedDeterminator::class => new DateTime('2001-01-01')],
             [MyLastModifedDeterminator::class => new DateTime('2003-01-01')],
             [MyLastModifedDeterminator::class => new DateTime('2002-01-01')],
         ]);
-        $this->assertEquals(new DateTime('2003-01-01'), $annotation->determineLastModified(new Request()));
+        $this->assertEquals(new DateTime('2003-01-01'), $attribute->determineLastModified(new Request()));
     }
 }
 
