@@ -174,7 +174,7 @@ final class EventListenerTest extends TestCase
     private function exerciseOnKernelController(array $callable): void
     {
         $this->callable = $callable;
-        $this->filterControllerEvent = new ControllerEvent($this->kernel, $this->callable, $this->request, HttpKernelInterface::MASTER_REQUEST);
+        $this->filterControllerEvent = new ControllerEvent($this->kernel, $this->callable, $this->request, HttpKernelInterface::MAIN_REQUEST);
 
         $this->eventListener->onKernelController($this->filterControllerEvent);
     }
@@ -197,7 +197,7 @@ final class EventListenerTest extends TestCase
 
     private function createFilterResponseEvent(Request $request, Response $response): ResponseEvent
     {
-        return new ResponseEvent($this->kernel, $request, HttpKernelInterface::MASTER_REQUEST, $response);
+        return new ResponseEvent($this->kernel, $request, HttpKernelInterface::MAIN_REQUEST, $response);
     }
 }
 
