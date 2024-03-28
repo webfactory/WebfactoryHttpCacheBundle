@@ -1,8 +1,5 @@
 name: Dependencies
 
-permissions:
-    contents: read
-
 on:
     push:
         branches:
@@ -10,27 +7,31 @@ on:
     pull_request:
 
 env:
-    PHP_VERSION: 7.4
+    PHP_VERSION: 8.1
 
 jobs:
     composer-require-checker:
         name: Check missing composer requirements
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-22.04
         steps:
-            -   uses: shivammathur/setup-php@v2
+            -   uses: actions/checkout@v3
+            -   name: Konfiguriere PHP-Version und -Einstellungen im Worker-Node
+                uses: shivammathur/setup-php@v2
                 with:
                   php-version: ${{ env.PHP_VERSION }}
                   coverage: none
                   tools: composer:v2
-            -   uses: actions/checkout@v3
-            -   uses: actions/cache@v3
+                  ini-values: variables_order=EGPCS, date.timezone=Europe/Berlin
+            -   name: Cache Composer Dependencies
+                uses: actions/cache@v1
                 with:
-                    path: vendor
-                    key: composer-${{ runner.os }}-${{ env.PHP_VERSION }}-${{ hashFiles('composer.json') }}
+                    path: vendor/
+                    key: composer-${{ env.PHP_VERSION }}-${{ hashFiles('composer.*') }}
                     restore-keys: |
-                        composer-${{ runner.os }}-${{ env.PHP_VERSION }}-
-                        composer-${{ runner.os }}-
+                        composer-${{ env.PHP_VERSION }}-${{ github.ref }}
+                        composer-${{ env.PHP_VERSION }}-
             -   run: |
-                    composer install --no-interaction --no-progress --ansi --no-scripts
+                    composer install --no-interaction --no-scripts --no-progress --no-suggest
                     composer show
-            -   uses: docker://webfactory/composer-require-checker:3.2.0
+            -   name: ComposerRequireChecker
+                uses: docker://ghcr.io/webfactory/composer-require-checker:4.8.0
