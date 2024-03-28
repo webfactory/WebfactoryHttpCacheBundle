@@ -11,6 +11,7 @@ namespace Webfactory\HttpCacheBundle\NotModified\Annotation;
 
 /**
  * @Annotation
+ *
  * @deprecated, to be replaced by attribute-based configuration
  */
 final class ReplaceWithNotModifiedResponse extends \Webfactory\HttpCacheBundle\NotModified\Attribute\ReplaceWithNotModifiedResponse

@@ -9,6 +9,7 @@
 
 namespace Webfactory\HttpCacheBundle\NotModified\Attribute;
 
+use Attribute;
 use DateTime;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -19,10 +20,10 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
  * This attribute determines the latest last modified date over all of its LastModifiedDeterminators. This date is used
  * by the \Webfactory\HttpCacheBundle\NotModified\EventListener to possibly replace the execution of a controller with
  * sending a Not Modified HTTP response.
- * 
+ *
  * @final
  */
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD)]
 class ReplaceWithNotModifiedResponse
 {
     /** @var array */
