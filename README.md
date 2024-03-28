@@ -193,7 +193,7 @@ services:
 
 and note the service name to the Annotation:
 
-    @ReplaceWithNotModifiedResponse({"app_caching_latest_posts"})
+    @ReplaceWithNotModifiedResponse({"@app_caching_latest_posts"})
 
 To combine multiple LastModifiedDeterminators, simply add all of them to the annotation:
  

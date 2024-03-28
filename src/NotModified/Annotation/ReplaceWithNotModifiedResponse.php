@@ -9,88 +9,22 @@
 
 namespace Webfactory\HttpCacheBundle\NotModified\Annotation;
 
-use DateTime;
-use RuntimeException;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
-
 /**
- * This Annotation determines the latest last modified date over all of its LastModifiedDeterminators. This date is used
- * by the \Webfactory\HttpCacheBundle\NotModified\EventListener to possibly replace the execution of a controller with
- * sending a Not Modified HTTP response.
- *
  * @Annotation
+ * @deprecated, to be replaced by attribute-based configuration
  */
-final class ReplaceWithNotModifiedResponse
+final class ReplaceWithNotModifiedResponse extends \Webfactory\HttpCacheBundle\NotModified\Attribute\ReplaceWithNotModifiedResponse
 {
-    /** @var array */
-    private $parameters;
-
-    /** @var LastModifiedDeterminator[] */
-    private $lastModifiedDeterminators;
-
-    /** @var ContainerInterface */
-    private $container;
-
-    /** @var DateTime|null */
-    private $lastModified;
-
     public function __construct(array $parameters)
     {
-        $this->parameters = $parameters;
-    }
+        trigger_deprecation(
+            'webfactory/http-cache-bundle',
+            '1.4.0',
+            'The %s annotation has been deprecated, use the %s attribute instead.',
+            NotModified\Annotation\ReplaceWithNotModifiedResponse::class,
+            NotModified\Attribute\ReplaceWithNotModifiedResponse::class
+        );
 
-    /**
-     * @return DateTime|null
-     */
-    public function determineLastModified(Request $request)
-    {
-        $this->initialiseLastModifiedDeterminators();
-
-        foreach ($this->lastModifiedDeterminators as $lastModifiedDeterminator) {
-            $lastModifiedOfCurrentDeterminator = $lastModifiedDeterminator->getLastModified($request);
-            if (null === $this->lastModified || $this->lastModified < $lastModifiedOfCurrentDeterminator) {
-                $this->lastModified = $lastModifiedOfCurrentDeterminator;
-            }
-        }
-
-        return $this->lastModified;
-    }
-
-    public function setContainer(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
-
-    private function initialiseLastModifiedDeterminators()
-    {
-        if (0 === count($this->parameters['value'])) {
-            throw new RuntimeException('The annotation '.get_class($this).' has to be parametrised with LastModifiedDeterminators.');
-        }
-
-        foreach ($this->parameters['value'] as $lastModifiedDeterminatorDescription) {
-            $lastModifiedDeterminator = null;
-
-            if (is_string($lastModifiedDeterminatorDescription)) {
-                if ('@' === $lastModifiedDeterminatorDescription[0]) {
-                    $lastModifiedDeterminator = $this->container->get(substr($lastModifiedDeterminatorDescription, 1));
-                } else {
-                    $lastModifiedDeterminator = new $lastModifiedDeterminatorDescription();
-                }
-            }
-
-            if (is_array($lastModifiedDeterminatorDescription)) {
-                $lastModifiedDeterminatorClass = key($lastModifiedDeterminatorDescription);
-                $lastModifiedDeterminatorParameter = current($lastModifiedDeterminatorDescription);
-                $lastModifiedDeterminator = new $lastModifiedDeterminatorClass($lastModifiedDeterminatorParameter);
-            }
-
-            if (!($lastModifiedDeterminator instanceof LastModifiedDeterminator)) {
-                throw new RuntimeException('The class "'.get_class($lastModifiedDeterminator).'" does not implement '.LastModifiedDeterminator::class.'.');
-            }
-
-            $this->lastModifiedDeterminators[] = $lastModifiedDeterminator;
-        }
+        parent::__construct($parameters['value']);
     }
 }
