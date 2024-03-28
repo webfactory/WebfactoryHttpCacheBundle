@@ -5,7 +5,6 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service id="Webfactory\HttpCacheBundle\NotModified\EventListener" class="Webfactory\HttpCacheBundle\NotModified\EventListener" public="true">
-            <argument type="service" id="annotation_reader" />
             <argument type="service" id="service_container" />
             <argument>%kernel.debug%</argument>
             <tag name="kernel.event_listener" event="kernel.controller" priority="-200" />

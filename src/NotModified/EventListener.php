@@ -9,14 +9,13 @@
 
 namespace Webfactory\HttpCacheBundle\NotModified;
 
-use Doctrine\Common\Annotations\Reader;
 use ReflectionMethod;
 use SplObjectStorage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Webfactory\HttpCacheBundle\NotModified;
+use Webfactory\HttpCacheBundle\NotModified\Attribute\ReplaceWithNotModifiedResponse;
 
 /**
  * Symfony EventListener for adding a "last modified" header to the response on the one hand. On the other hand, it
@@ -25,9 +24,6 @@ use Webfactory\HttpCacheBundle\NotModified;
  */
 final class EventListener
 {
-    /** @var Reader */
-    private $reader;
-
     /** @var ContainerInterface */
     private $container;
 
@@ -44,9 +40,8 @@ final class EventListener
      */
     private $debug;
 
-    public function __construct(Reader $reader, ContainerInterface $container, bool $debug = false)
+    public function __construct(ContainerInterface $container, bool $debug = false)
     {
-        $this->reader = $reader;
         $this->container = $container;
         $this->lastModified = new SplObjectStorage();
         $this->debug = $debug;
@@ -107,7 +102,7 @@ final class EventListener
     /**
      * @param $controllerCallable callable PHP callback pointing to the method to reflect on.
      *
-     * @return ReplaceWithNotModifiedResponse|null The annotation, if found. Null otherwise.
+     * @return ?ReplaceWithNotModifiedResponse The annotation, if found. Null otherwise.
      */
     private function findAnnotation(callable $controllerCallable)
     {
@@ -118,25 +113,8 @@ final class EventListener
         [$class, $methodName] = $controllerCallable;
         $method = new ReflectionMethod($class, $methodName);
 
-        if (PHP_MAJOR_VERSION >= 8) {
-            $attributes = $method->getAttributes(NotModified\Attribute\ReplaceWithNotModifiedResponse::class);
+        $attributes = $method->getAttributes(ReplaceWithNotModifiedResponse::class);
 
-            if ($attributes) {
-                return $attributes[0]->newInstance();
-            }
-        }
-
-        /** @var ReplaceWithNotModifiedResponse|null $annotation */
-        $annotation = $this->reader->getMethodAnnotation($method, NotModified\Annotation\ReplaceWithNotModifiedResponse::class);
-
-        if ($annotation) {
-            trigger_deprecation(
-                'webfactory/http-cache-bundle',
-                '1.4.0',
-                'Configuring webfactory/http-cache-bundle with annotations is deprecated, use attributes instead.'
-            );
-        }
-
-        return $annotation;
+        return $attributes ? $attributes[0]->newInstance() : null;
     }
 }
