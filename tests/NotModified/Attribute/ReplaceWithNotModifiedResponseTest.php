@@ -120,7 +120,7 @@ final class MyLastModifedDeterminator implements LastModifiedDeterminator
     /** @var DateTime */
     private $lastModified;
 
-    public function __construct(DateTime $lastModified = null)
+    public function __construct(?DateTime $lastModified = null)
     {
         $this->lastModified = $lastModified ?: DateTime::createFromFormat('U', time());
     }
