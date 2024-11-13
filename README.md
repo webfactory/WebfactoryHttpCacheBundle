@@ -64,6 +64,18 @@ also requires a revalidation on every request as the response is
 
 [Learn more about Symonfy's HTTP caching]: http://symfony.com/doc/current/book/http_cache.html
 
+## Installation
+
+```
+composer require webfactory/http-cache-bundle
+```
+
+and add to your `bundles.php`:
+
+```
+Webfactory\HttpCacheBundle\WebfactoryHttpCacheBundle::class => ['all' => true],
+```
+
 ## Usage
 
 Choose a controller action you want to possibly replace with a 304 Not Modified response. Write one LastModifiedDeterminator for each
