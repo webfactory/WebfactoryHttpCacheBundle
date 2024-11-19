@@ -159,6 +159,42 @@ final class EventListenerTest extends TestCase
         self::assertNull($anotherResponse->getLastModified());
     }
 
+    /** @test */
+    public function onKernelControllerSearchesEventInsteadOfControllerForAttribute(): void
+    {
+        // setup an event that should lead to a NotModified response
+        $this->request->headers->set('If-Modified-Since', '-1 hour');
+        $this->filterControllerEvent = new ControllerEvent(
+            $this->kernel,
+            [DummyController::class, 'oneDayAgoModifiedLastModifiedAction'],
+            $this->request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        // now simulate another EventListener has replaced the response of the controller inside the event, but has
+        // saved the original attributes in the event.
+        $this->filterControllerEvent->setController(
+            function () {
+                return new Response();
+            },
+            [ReplaceWithNotModifiedResponse::class => [new ReplaceWithNotModifiedResponse([OneDayAgoModifiedLastModifiedDeterminator::class])]]
+        );
+
+        $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        self::assertNotModifiedResponse();
+    }
+
+    /** @test */
+    public function onKernelControllerSavesOriginalControllerAttributesWhenReplacingTheController(): void
+    {
+        $this->request->headers->set('If-Modified-Since', '-1 hour');
+
+        $this->exerciseOnKernelController([DummyController::class, 'oneDayAgoModifiedLastModifiedAction']);
+
+        self::assertNotEmpty($this->filterControllerEvent->getAttributes());
+    }
+
     private function exerciseOnKernelController(array $callable): void
     {
         $this->callable = $callable;
