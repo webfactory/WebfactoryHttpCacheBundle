@@ -44,7 +44,7 @@ final class EventListener
      * header in the request, replace the determined controller action with a minimal action that just returns an
      * "empty" response with a 304 Not Modified HTTP status code.
      */
-    public function onKernelController(ControllerEvent $event)
+    public function onKernelController(ControllerEvent $event): void
     {
         $annotation = $this->findAnnotation($event->getController());
         if (!$annotation) {
@@ -80,7 +80,7 @@ final class EventListener
      * If a last modified date was determined for the current (master or sub) request, set it to the response so the
      * client can use it for the "If-Modified-Since" header in subsequent requests.
      */
-    public function onKernelResponse(ResponseEvent $event)
+    public function onKernelResponse(ResponseEvent $event): void
     {
         $request = $event->getRequest();
         $response = $event->getResponse();
@@ -92,10 +92,8 @@ final class EventListener
 
     /**
      * @param $controllerCallable callable PHP callback pointing to the method to reflect on.
-     *
-     * @return ?ReplaceWithNotModifiedResponse The annotation, if found. Null otherwise.
      */
-    private function findAnnotation(callable $controllerCallable)
+    private function findAnnotation(callable $controllerCallable): ?ReplaceWithNotModifiedResponse
     {
         if (!is_array($controllerCallable)) {
             return null;

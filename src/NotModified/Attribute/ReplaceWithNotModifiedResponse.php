@@ -34,10 +34,7 @@ final class ReplaceWithNotModifiedResponse
     ) {
     }
 
-    /**
-     * @return DateTime|null
-     */
-    public function determineLastModified(Request $request)
+    public function determineLastModified(Request $request): ?DateTime
     {
         $this->initialiseLastModifiedDeterminators();
 
@@ -51,12 +48,12 @@ final class ReplaceWithNotModifiedResponse
         return $this->lastModified;
     }
 
-    public function setContainer(ContainerInterface $container)
+    public function setContainer(ContainerInterface $container): void
     {
         $this->container = $container;
     }
 
-    private function initialiseLastModifiedDeterminators()
+    private function initialiseLastModifiedDeterminators(): void
     {
         if (0 === count($this->parameters)) {
             throw new RuntimeException('The attribute '.get_class($this).' has to be parametrised with LastModifiedDeterminators.');
