@@ -11,6 +11,7 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 
 use Closure;
 use DateTime;
+use Error;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -159,6 +160,51 @@ final class EventListenerTest extends TestCase
         self::assertNull($anotherResponse->getLastModified());
     }
 
+    /** @test */
+    public function onKernelControllerSearchesEventInsteadOfControllerForAttribute(): void
+    {
+        // setup an event that should lead to a NotModified response
+        $this->request->headers->set('If-Modified-Since', '-1 hour');
+        $this->filterControllerEvent = new ControllerEvent(
+            $this->kernel,
+            [DummyController::class, 'oneDayAgoModifiedLastModifiedAction'],
+            $this->request,
+            HttpKernelInterface::MAIN_REQUEST
+        );
+
+        // now simulate another EventListener has replaced the response of the controller inside the event, but has
+        // saved the original attributes in the event.
+        $this->filterControllerEvent->setController(
+            function () {
+                return new Response();
+            },
+            [ReplaceWithNotModifiedResponse::class => [new ReplaceWithNotModifiedResponse([OneDayAgoModifiedLastModifiedDeterminator::class])]]
+        );
+
+        $this->eventListener->onKernelController($this->filterControllerEvent);
+
+        self::assertNotModifiedResponse();
+    }
+
+    /** @test */
+    public function onKernelControllerSavesOriginalControllerAttributesWhenReplacingTheController(): void
+    {
+        $this->request->headers->set('If-Modified-Since', '-1 hour');
+
+        $this->exerciseOnKernelController([DummyController::class, 'oneDayAgoModifiedLastModifiedAction']);
+
+        self::assertNotEmpty($this->filterControllerEvent->getAttributes());
+    }
+
+    /** @test */
+    public function onKernelControllerThrowsExceptionIfAttributeIsFoundMoreThanOnce(): void
+    {
+        self::expectException(Error::class);
+        self::expectExceptionMessageMatches('/ReplaceWithNotModifiedResponse/');
+
+        $this->exerciseOnKernelController([DummyController::class, 'actionWithMoreThanOneAttribute']);
+    }
+
     private function exerciseOnKernelController(array $callable): void
     {
         $this->callable = $callable;
@@ -210,6 +256,13 @@ final class DummyController
 
     #[ReplaceWithNotModifiedResponse([FixedDateAgoModifiedLastModifiedDeterminator::class])]
     public static function fixedDateAgoModifiedLastModifiedDeterminatorAction(): Response
+    {
+        return new Response();
+    }
+
+    #[ReplaceWithNotModifiedResponse([AbstainingLastModifiedDeterminator::class])]
+    #[ReplaceWithNotModifiedResponse([OneDayAgoModifiedLastModifiedDeterminator::class])]
+    public static function actionWithMoreThanOneAttribute(): Response
     {
         return new Response();
     }
