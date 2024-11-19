@@ -2,7 +2,7 @@
 
 <container xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns="http://symfony.com/schema/dic/services"
-           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
         <service id="Webfactory\HttpCacheBundle\NotModified\EventListener" class="Webfactory\HttpCacheBundle\NotModified\EventListener" public="true">
             <argument type="service" id="service_container" />
