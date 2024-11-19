@@ -24,27 +24,18 @@ use Webfactory\HttpCacheBundle\NotModified\Attribute\ReplaceWithNotModifiedRespo
  */
 final class EventListener
 {
-    /** @var ContainerInterface */
-    private $container;
-
     /**
      * Maps (master and sub) requests to their corresponding last modified date. This date is determined by the
      * ReplaceWithNotModifiedResponse annotation of the corresponding controller's action.
-     *
-     * @var SplObjectStorage
      */
-    private $lastModified;
+    private SplObjectStorage $lastModified;
 
-    /**
-     * @var bool Symfony kernel.debug mode
-     */
-    private $debug;
-
-    public function __construct(ContainerInterface $container, bool $debug = false)
-    {
-        $this->container = $container;
+    public function __construct(
+        private readonly ContainerInterface $container,
+        // Symfony kernel.debug mode
+        private readonly bool $debug = false,
+    ) {
         $this->lastModified = new SplObjectStorage();
-        $this->debug = $debug;
     }
 
     /**

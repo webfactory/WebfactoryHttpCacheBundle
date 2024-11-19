@@ -117,8 +117,7 @@ final class FakeLastModifiedDeterminatorWithoutInterface
 
 final class MyLastModifedDeterminator implements LastModifiedDeterminator
 {
-    /** @var DateTime */
-    private $lastModified;
+    private \DateTime $lastModified;
 
     public function __construct(?DateTime $lastModified = null)
     {

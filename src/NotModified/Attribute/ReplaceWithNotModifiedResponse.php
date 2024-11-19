@@ -24,21 +24,14 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 #[Attribute(Attribute::TARGET_METHOD)]
 final class ReplaceWithNotModifiedResponse
 {
-    /** @var array */
-    private $parameters;
-
     /** @var LastModifiedDeterminator[] */
-    private $lastModifiedDeterminators;
+    private array $lastModifiedDeterminators;
+    private ContainerInterface $container;
+    private ?DateTime $lastModified = null;
 
-    /** @var ContainerInterface */
-    private $container;
-
-    /** @var DateTime|null */
-    private $lastModified;
-
-    public function __construct(array $parameters)
-    {
-        $this->parameters = $parameters;
+    public function __construct(
+        private readonly array $parameters,
+    ) {
     }
 
     /**
