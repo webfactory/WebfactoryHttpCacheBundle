@@ -195,6 +195,15 @@ final class EventListenerTest extends TestCase
         self::assertNotEmpty($this->filterControllerEvent->getAttributes());
     }
 
+    /** @test */
+    public function onKernelControllerThrowsExceptionIfAttributeIsFoundMoreThanOnce(): void
+    {
+        self::expectException(\Error::class);
+        self::expectExceptionMessageMatches('/ReplaceWithNotModifiedResponse/');
+
+        $this->exerciseOnKernelController([DummyController::class, 'actionWithMoreThanOneAttribute']);
+    }
+
     private function exerciseOnKernelController(array $callable): void
     {
         $this->callable = $callable;
@@ -246,6 +255,13 @@ final class DummyController
 
     #[ReplaceWithNotModifiedResponse([FixedDateAgoModifiedLastModifiedDeterminator::class])]
     public static function fixedDateAgoModifiedLastModifiedDeterminatorAction(): Response
+    {
+        return new Response();
+    }
+
+    #[ReplaceWithNotModifiedResponse([AbstainingLastModifiedDeterminator::class])]
+    #[ReplaceWithNotModifiedResponse([OneDayAgoModifiedLastModifiedDeterminator::class])]
+    public static function actionWithMoreThanOneAttribute(): Response
     {
         return new Response();
     }
