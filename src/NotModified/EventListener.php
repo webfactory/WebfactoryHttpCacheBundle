@@ -9,7 +9,6 @@
 
 namespace Webfactory\HttpCacheBundle\NotModified;
 
-use ReflectionMethod;
 use SplObjectStorage;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -46,14 +45,16 @@ final class EventListener
      */
     public function onKernelController(ControllerEvent $event): void
     {
-        $annotation = $this->findAnnotation($event->getController());
-        if (!$annotation) {
+        $attributes = $event->getAttributes(ReplaceWithNotModifiedResponse::class);
+
+        if (!$attributes) {
             return;
         }
 
+        $attribute = $attributes[0];
         $request = $event->getRequest();
-        $annotation->setContainer($this->container);
-        $lastModified = $annotation->determineLastModified($request);
+        $attribute->setContainer($this->container);
+        $lastModified = $attribute->determineLastModified($request);
         if (!$lastModified) {
             return;
         }
@@ -70,9 +71,12 @@ final class EventListener
         $response->setLastModified($lastModified);
 
         if ($response->isNotModified($request)) {
-            $event->setController(function () use ($response) {
-                return $response;
-            });
+            $event->setController(
+                function () use ($response) {
+                    return $response;
+                },
+                $event->getAttributes()
+            );
         }
     }
 
@@ -88,22 +92,5 @@ final class EventListener
         if (isset($this->lastModified[$request])) {
             $response->setLastModified($this->lastModified[$request]);
         }
-    }
-
-    /**
-     * @param $controllerCallable callable PHP callback pointing to the method to reflect on.
-     */
-    private function findAnnotation(callable $controllerCallable): ?ReplaceWithNotModifiedResponse
-    {
-        if (!is_array($controllerCallable)) {
-            return null;
-        }
-
-        [$class, $methodName] = $controllerCallable;
-        $method = new ReflectionMethod($class, $methodName);
-
-        $attributes = $method->getAttributes(ReplaceWithNotModifiedResponse::class);
-
-        return $attributes ? $attributes[0]->newInstance() : null;
     }
 }
