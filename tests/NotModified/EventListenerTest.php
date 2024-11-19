@@ -11,6 +11,7 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 
 use Closure;
 use DateTime;
+use Error;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -198,7 +199,7 @@ final class EventListenerTest extends TestCase
     /** @test */
     public function onKernelControllerThrowsExceptionIfAttributeIsFoundMoreThanOnce(): void
     {
-        self::expectException(\Error::class);
+        self::expectException(Error::class);
         self::expectExceptionMessageMatches('/ReplaceWithNotModifiedResponse/');
 
         $this->exerciseOnKernelController([DummyController::class, 'actionWithMoreThanOneAttribute']);
