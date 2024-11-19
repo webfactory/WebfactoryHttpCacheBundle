@@ -117,15 +117,14 @@ final class FakeLastModifiedDeterminatorWithoutInterface
 
 final class MyLastModifedDeterminator implements LastModifiedDeterminator
 {
-    /** @var DateTime */
-    private $lastModified;
+    private DateTime $lastModified;
 
     public function __construct(?DateTime $lastModified = null)
     {
         $this->lastModified = $lastModified ?: DateTime::createFromFormat('U', time());
     }
 
-    public function getLastModified(Request $request)
+    public function getLastModified(Request $request): DateTime
     {
         return $this->lastModified;
     }

@@ -24,27 +24,17 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 #[Attribute(Attribute::TARGET_METHOD)]
 final class ReplaceWithNotModifiedResponse
 {
-    /** @var array */
-    private $parameters;
-
     /** @var LastModifiedDeterminator[] */
-    private $lastModifiedDeterminators;
+    private array $lastModifiedDeterminators;
+    private ContainerInterface $container;
+    private ?DateTime $lastModified = null;
 
-    /** @var ContainerInterface */
-    private $container;
-
-    /** @var DateTime|null */
-    private $lastModified;
-
-    public function __construct(array $parameters)
-    {
-        $this->parameters = $parameters;
+    public function __construct(
+        private readonly array $parameters,
+    ) {
     }
 
-    /**
-     * @return DateTime|null
-     */
-    public function determineLastModified(Request $request)
+    public function determineLastModified(Request $request): ?DateTime
     {
         $this->initialiseLastModifiedDeterminators();
 
@@ -58,12 +48,12 @@ final class ReplaceWithNotModifiedResponse
         return $this->lastModified;
     }
 
-    public function setContainer(ContainerInterface $container)
+    public function setContainer(ContainerInterface $container): void
     {
         $this->container = $container;
     }
 
-    private function initialiseLastModifiedDeterminators()
+    private function initialiseLastModifiedDeterminators(): void
     {
         if (0 === count($this->parameters)) {
             throw new RuntimeException('The attribute '.get_class($this).' has to be parametrised with LastModifiedDeterminators.');

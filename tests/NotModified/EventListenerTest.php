@@ -33,27 +33,15 @@ final class EventListenerTest extends TestCase
 {
     /**
      * System under test.
-     *
-     * @var EventListener
      */
-    private $eventListener;
+    private EventListener $eventListener;
 
-    /** @var ContainerInterface|MockObject */
-    private $container;
-
-    /** @var ControllerEvent|MockObject */
-    private $filterControllerEvent;
-
-    /** @var Request */
-    private $request;
-
-    /** @var Response */
-    private $response;
-
+    private ContainerInterface&MockObject $container;
+    private ControllerEvent|MockObject $filterControllerEvent;
+    private Request $request;
+    private Response $response;
     private $callable;
-
-    /** @var KernelInterface|MockObject */
-    private $kernel;
+    private KernelInterface&MockObject $kernel;
 
     protected function setUp(): void
     {
