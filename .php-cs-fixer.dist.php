@@ -19,10 +19,7 @@ return (new PhpCsFixer\Config())
     ->setFinder(
         PhpCsFixer\Finder::create()
             ->in(__DIR__)
-            ->notPath('conf/')
-            ->notPath('tmp/')
-            ->notPath('node_modules/')
-            ->notPath('var/cache')
+            ->notPath('src/Resources/config')
             ->notPath('vendor/')
     )
 ;
