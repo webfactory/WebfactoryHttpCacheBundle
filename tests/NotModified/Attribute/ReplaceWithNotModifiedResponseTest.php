@@ -10,6 +10,9 @@
 namespace Webfactory\HttpCacheBundle\Tests\NotModified\Attribute;
 
 use DateTime;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -23,9 +26,7 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
  */
 final class ReplaceWithNotModifiedResponseTest extends TestCase
 {
-    /**
-     * @test
-     */
+    #[Test]
     public function lastModifiedDescriptionsCannotBeEmpty()
     {
         $this->expectException(RuntimeException::class);
@@ -33,20 +34,15 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
         $attribute->determineLastModified(new Request());
     }
 
-    /**
-     * @test
-     *
-     * @doesNotPerformAssertions
-     */
+    #[Test]
+    #[DoesNotPerformAssertions]
     public function stringAsSimpleLastModifiedDescription()
     {
         $attribute = new ReplaceWithNotModifiedResponse([MyLastModifedDeterminator::class]);
         $attribute->determineLastModified(new Request());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function serviceNameAsLastModifiedDescription()
     {
         /** @var ContainerInterface|MockObject $container */
@@ -62,20 +58,15 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
         $attribute->determineLastModified(new Request());
     }
 
-    /**
-     * @test
-     *
-     * @doesNotPerformAssertions
-     */
+    #[Test]
+    #[DoesNotPerformAssertions]
     public function arrayAslastModifiedDeterminatorDescriptionWithConstructorArguments()
     {
         $attribute = new ReplaceWithNotModifiedResponse([[MyLastModifedDeterminator::class => new DateTime('2000-01-01')]]);
         $attribute->determineLastModified(new Request());
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function lastModifiedDeterminatorsHaveToImplementInterface()
     {
         $this->expectException(RuntimeException::class);
@@ -83,11 +74,8 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
         $attribute->determineLastModified(new Request());
     }
 
-    /**
-     * @test
-     *
-     * @group time-sensitive
-     */
+    #[Group('time-sensitive')]
+    #[Test]
     public function determineLastModifiedDeterminesLastModifiedOfOneDeterminator()
     {
         $attribute = new ReplaceWithNotModifiedResponse([MyLastModifedDeterminator::class]);
@@ -97,9 +85,7 @@ final class ReplaceWithNotModifiedResponseTest extends TestCase
         self::assertEquals(DateTime::createFromFormat('U', time()), $lastModified);
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function determineLastModifiedDeterminesLastModifiedOfMultipleDeterminators()
     {
         $attribute = new ReplaceWithNotModifiedResponse([
