@@ -2,6 +2,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+
 return static function(ContainerConfigurator $container) {
     $services = $container->services();
     $parameters = $container->parameters();
