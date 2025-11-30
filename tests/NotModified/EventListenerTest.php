@@ -12,6 +12,8 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 use Closure;
 use DateTime;
 use Error;
+use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -27,9 +29,8 @@ use Webfactory\HttpCacheBundle\NotModified\LastModifiedDeterminator;
 
 /**
  * Tests for the EventListener.
- *
- * @group time-sensitive
  */
+#[Group('time-sensitive')]
 final class EventListenerTest extends TestCase
 {
     /**
@@ -53,7 +54,7 @@ final class EventListenerTest extends TestCase
         $this->eventListener = new EventListener($this->container);
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerDoesNoHarmForMissingAnnotation(): void
     {
         $this->exerciseOnKernelController([DummyController::class, 'plainAction']);
@@ -61,7 +62,7 @@ final class EventListenerTest extends TestCase
         $this->assertRegularControllerResponse();
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerDoesNoHarmForNoDeterminedLastModified(): void
     {
         $this->exerciseOnKernelController([DummyController::class, 'abstainingLastModifiedAction']);
@@ -69,7 +70,7 @@ final class EventListenerTest extends TestCase
         $this->assertRegularControllerResponse();
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerDoesNoHarmIfNotModifiedSinceHeaderIsNotInRequest(): void
     {
         $this->exerciseOnKernelController([DummyController::class, 'oneDayAgoModifiedLastModifiedAction']);
@@ -77,7 +78,7 @@ final class EventListenerTest extends TestCase
         $this->assertRegularControllerResponse();
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerSkipsToModifiedResponseIfLastModifiedIsSmallerThanIfNotModifiedSinceHeader(): void
     {
         $this->request->headers->set('If-Modified-Since', '-1 hour');
@@ -87,7 +88,7 @@ final class EventListenerTest extends TestCase
         $this->assertNotModifiedResponse();
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerAlwaysRunsControllerInKernelDebugMode(): void
     {
         $this->eventListener = new EventListener($this->container, true);
@@ -98,7 +99,7 @@ final class EventListenerTest extends TestCase
         $this->assertRegularControllerResponse();
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerSkipsToNotModifiedResponseIfLastModifiedIsEqualToIfNotModifiedSinceHeader(): void
     {
         $this->request->headers->set('If-Modified-Since', '2000-01-01');
@@ -108,7 +109,7 @@ final class EventListenerTest extends TestCase
         $this->assertNotModifiedResponse();
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerDoesNotReplaceDeterminedControllerIfLastModifiedIsGreaterThanIfNotModifiedSinceHeader(): void
     {
         $this->request->headers->set('If-Modified-Since', '-2 day');
@@ -118,9 +119,7 @@ final class EventListenerTest extends TestCase
         $this->assertRegularControllerResponse();
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function onKernelResponseSetsLastModifiedHeaderToResponseIfAvailable(): void
     {
         $this->exerciseOnKernelController([DummyController::class, 'oneDayAgoModifiedLastModifiedAction']);
@@ -131,7 +130,7 @@ final class EventListenerTest extends TestCase
         self::assertEquals(DateTime::createFromFormat('U', time() - 86400), $this->response->getLastModified());
     }
 
-    /** @test */
+    #[Test]
     public function onKernelResponseDoesNotSetLastModifiedHeaderToResponseIfNotAvailable(): void
     {
         $this->exerciseOnKernelController([DummyController::class, 'abstainingLastModifiedAction']);
@@ -142,7 +141,7 @@ final class EventListenerTest extends TestCase
         self::assertNull($this->response->getLastModified());
     }
 
-    /** @test */
+    #[Test]
     public function eventListenerDifferentiatesBetweenMultipleRequests(): void
     {
         $this->exerciseOnKernelController([DummyController::class, 'oneDayAgoModifiedLastModifiedAction']);
@@ -160,7 +159,7 @@ final class EventListenerTest extends TestCase
         self::assertNull($anotherResponse->getLastModified());
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerSearchesEventInsteadOfControllerForAttribute(): void
     {
         // setup an event that should lead to a NotModified response
@@ -186,7 +185,7 @@ final class EventListenerTest extends TestCase
         self::assertNotModifiedResponse();
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerSavesOriginalControllerAttributesWhenReplacingTheController(): void
     {
         $this->request->headers->set('If-Modified-Since', '-1 hour');
@@ -196,7 +195,7 @@ final class EventListenerTest extends TestCase
         self::assertNotEmpty($this->filterControllerEvent->getAttributes());
     }
 
-    /** @test */
+    #[Test]
     public function onKernelControllerThrowsExceptionIfAttributeIsFoundMoreThanOnce(): void
     {
         self::expectException(Error::class);
