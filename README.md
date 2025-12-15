@@ -175,6 +175,5 @@ The latest last modified date determines the last modified date of the response.
 This bundle was started at webfactory GmbH, Bonn.
 
 - <https://www.webfactory.de>
-- <https://twitter.com/webfactory>
 
-Copyright 2018-2024 webfactory GmbH, Bonn. Code released under [the MIT license](LICENSE).
+Copyright 2018-2025 webfactory GmbH, Bonn. Code released under [the MIT license](LICENSE).
