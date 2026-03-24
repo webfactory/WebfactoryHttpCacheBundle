@@ -10,7 +10,7 @@
 namespace Webfactory\HttpCacheBundle\NotModified\Attribute;
 
 use Attribute;
-use DateTime;
+use DateTimeInterface;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -27,14 +27,18 @@ final class ReplaceWithNotModifiedResponse
     /** @var LastModifiedDeterminator[] */
     private array $lastModifiedDeterminators;
     private ContainerInterface $container;
-    private ?DateTime $lastModified = null;
+    private ?DateTimeInterface $lastModified = null;
 
     public function __construct(
         private readonly array $parameters,
     ) {
     }
 
-    public function determineLastModified(Request $request): ?DateTime
+    /**
+     * @internal
+     * @psalm-internal Webfactory\HttpCacheBundle
+     */
+    public function determineLastModified(Request $request): ?DateTimeInterface
     {
         $this->initialiseLastModifiedDeterminators();
 
@@ -48,6 +52,10 @@ final class ReplaceWithNotModifiedResponse
         return $this->lastModified;
     }
 
+    /**
+     * @internal
+     * @psalm-internal Webfactory\HttpCacheBundle
+     */
     public function setContainer(ContainerInterface $container): void
     {
         $this->container = $container;

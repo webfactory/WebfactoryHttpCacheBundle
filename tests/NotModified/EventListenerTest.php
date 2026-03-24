@@ -11,6 +11,7 @@ namespace Webfactory\HttpCacheBundle\Tests\NotModified;
 
 use Closure;
 use DateTime;
+use DateTimeInterface;
 use Error;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -269,7 +270,7 @@ final class DummyController
 
 final class AbstainingLastModifiedDeterminator implements LastModifiedDeterminator
 {
-    public function getLastModified(Request $request): ?DateTime
+    public function getLastModified(Request $request): ?DateTimeInterface
     {
         return null;
     }
@@ -277,7 +278,7 @@ final class AbstainingLastModifiedDeterminator implements LastModifiedDeterminat
 
 final class OneDayAgoModifiedLastModifiedDeterminator implements LastModifiedDeterminator
 {
-    public function getLastModified(Request $request): DateTime
+    public function getLastModified(Request $request): ?DateTimeInterface
     {
         return DateTime::createFromFormat('U', time() - 86400);
     }
@@ -285,7 +286,7 @@ final class OneDayAgoModifiedLastModifiedDeterminator implements LastModifiedDet
 
 final class FixedDateAgoModifiedLastModifiedDeterminator implements LastModifiedDeterminator
 {
-    public function getLastModified(Request $request): DateTime
+    public function getLastModified(Request $request): ?DateTimeInterface
     {
         return new DateTime('2000-01-01');
     }
