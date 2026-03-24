@@ -10,6 +10,7 @@
 namespace Webfactory\HttpCacheBundle\Tests\NotModified\Attribute;
 
 use DateTime;
+use DateTimeInterface;
 use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
@@ -103,14 +104,14 @@ final class FakeLastModifiedDeterminatorWithoutInterface
 
 final class MyLastModifedDeterminator implements LastModifiedDeterminator
 {
-    private DateTime $lastModified;
+    private ?DateTimeInterface $lastModified;
 
-    public function __construct(?DateTime $lastModified = null)
+    public function __construct(?DateTimeInterface $lastModified = null)
     {
         $this->lastModified = $lastModified ?: DateTime::createFromFormat('U', time());
     }
 
-    public function getLastModified(Request $request): DateTime
+    public function getLastModified(Request $request): ?DateTimeInterface
     {
         return $this->lastModified;
     }

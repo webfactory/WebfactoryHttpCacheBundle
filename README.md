@@ -99,7 +99,7 @@ final class PostsLastModifiedDeterminator implements LastModifiedDeterminator
         private readonly BlogPostRepository $blogPostRepository,
     ) {
     
-    public function getLastModified(Request $request): ?\DateTime
+    public function getLastModified(Request $request): ?\DateTimeInterface
     {
         $post = $this->blogPostRepository->findLatest();
         

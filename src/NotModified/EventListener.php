@@ -20,6 +20,9 @@ use Webfactory\HttpCacheBundle\NotModified\Attribute\ReplaceWithNotModifiedRespo
  * Symfony EventListener for adding a "last modified" header to the response on the one hand. On the other hand, it
  * replaces the execution of a controller action with a Not Modified HTTP response, if no newer "last modified" date is
  * determined than the one in the header of a subsequent request.
+ *
+ * @internal
+ * @psalm-internal Webfactory\HttpCacheBundle
  */
 final class EventListener
 {

@@ -7,6 +7,10 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 
+/**
+ * @internal
+ * @psalm-internal Webfactory\HttpCacheBundle
+ */
 class WebfactoryHttpCacheExtension extends Extension
 {
     public function load(array $configs, ContainerBuilder $container): void
